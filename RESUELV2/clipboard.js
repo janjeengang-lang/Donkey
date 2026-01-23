@@ -6,12 +6,14 @@ const STATE = {
     filter: 'all',
     search: '',
     activeItem: null,
-    chatHistory: []
+    chatHistory: [],
+    clipboardModel: ''
 };
 
 // Start
 document.addEventListener('DOMContentLoaded', async () => {
     await loadClipboardHistory();
+    await loadClipboardModel();
     setupEventListeners();
     renderGrid();
 });
@@ -20,6 +22,15 @@ async function loadClipboardHistory() {
     const { zepraClipboard = [] } = await chrome.storage.local.get('zepraClipboard');
     STATE.items = zepraClipboard;
     updateEmptyState();
+}
+
+async function loadClipboardModel() {
+    const { clipboardModel = '' } = await chrome.storage.local.get('clipboardModel');
+    STATE.clipboardModel = clipboardModel;
+    const modelSelect = document.getElementById('clipboardModel');
+    if (modelSelect) {
+        modelSelect.value = clipboardModel;
+    }
 }
 
 function setupEventListeners() {
@@ -49,6 +60,16 @@ function setupEventListeners() {
             showToast('History cleared');
         }
     });
+
+    const modelSelect = document.getElementById('clipboardModel');
+    if (modelSelect) {
+        modelSelect.addEventListener('change', async (e) => {
+            const value = e.target.value;
+            STATE.clipboardModel = value;
+            await chrome.storage.local.set({ clipboardModel: value });
+            showToast('AI model updated');
+        });
+    }
 
     // Modal Close
     document.querySelector('.close-modal').addEventListener('click', closeModal);
@@ -203,6 +224,8 @@ function createCard(item) {
 
     const favIconFill = item.favorite ? 'fill="#fbbf24" color="#fbbf24"' : 'fill="none"';
 
+    const analysisHtml = buildCardAnalysis(item);
+
     el.innerHTML = `
     <div class="card-header">
       <span class="card-type ${item.type}">${item.type || 'TEXT'}</span>
@@ -217,6 +240,7 @@ function createCard(item) {
     </div>
     <div class="card-body ${isCode ? 'is-code' : ''}">${htmlEscape(item.text.slice(0, 300))}</div>
     ${tagsHtml}
+    ${analysisHtml}
     <div class="card-footer">
       <a href="${item.sourceUrl || '#'}" class="source-link" target="_blank">${item.sourceTitle || item.sourceUrl || 'Unknown Source'}</a>
       <span>${timeAgo(item.timestamp)}</span>
@@ -236,6 +260,20 @@ function createCard(item) {
     });
 
     return el;
+}
+
+function buildCardAnalysis(item) {
+    if (!item.aiSummary && (!item.keyPoints || !item.keyPoints.length)) return '';
+    const summary = item.aiSummary ? `<div class="card-analysis-summary">${formatInline(item.aiSummary)}</div>` : '';
+    const points = (item.keyPoints || []).slice(0, 3).map(pt => `<li>${formatInline(pt)}</li>`).join('');
+    const list = points ? `<ul class="card-analysis-list">${points}</ul>` : '';
+    return `
+        <div class="card-analysis">
+            <div class="card-analysis-title">✨ AI Analysis</div>
+            ${summary}
+            ${list}
+        </div>
+    `;
 }
 
 function openDetail(item) {
@@ -288,14 +326,14 @@ function openDetail(item) {
 
     if (item.aiSummary || (item.keyPoints && item.keyPoints.length)) {
         aiBox.style.display = 'block';
-        summaryEl.textContent = item.aiSummary || (item.description || 'No summary available.');
+        summaryEl.innerHTML = renderSafeText(item.aiSummary || (item.description || 'No summary available.'));
 
         pointsEl.innerHTML = '';
         if (item.keyPoints && item.keyPoints.length) {
             item.keyPoints.forEach(pt => {
                 const li = document.createElement('li');
                 li.className = 'point-item';
-                li.textContent = pt;
+                li.innerHTML = renderSafeText(pt);
                 pointsEl.appendChild(li);
             });
         }
@@ -346,7 +384,8 @@ async function sendChatMessage() {
         const response = await chrome.runtime.sendMessage({
             type: 'CHAT_WITH_AI',
             prompt: prompt,
-            history: STATE.chatHistory.slice(0, -1) // Send previous history
+            history: STATE.chatHistory.slice(0, -1), // Send previous history
+            model: STATE.clipboardModel
         });
 
         // Remove loading bubble
@@ -518,6 +557,7 @@ function renderMarkdown(text) {
     // Bold/Italic
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+    html = html.replace(/__(.*?)__/g, '<span class="text-underline">$1</span>');
     html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
 
     // Lists (Basic)
@@ -704,7 +744,7 @@ function addChatMessage(role, text) {
     }
 
     const dir = detectDirection(text);
-    const formattedText = role === 'ai' ? htmlCardRender(text) : htmlEscape(text).replace(/\n/g, '<br>');
+    const formattedText = role === 'ai' ? renderChatPayload(text) : htmlEscape(text).replace(/\n/g, '<br>');
 
     div.innerHTML = `
         ${avatarHtml}
@@ -715,6 +755,140 @@ function addChatMessage(role, text) {
 
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
+}
+
+function renderChatPayload(text) {
+    const parsed = extractJsonPayload(text);
+    if (parsed) {
+        return renderChatJson(parsed);
+    }
+    if (text && text.includes(':::artifact')) {
+        return htmlCardRender(text);
+    }
+    return renderMarkdownSimple(text);
+}
+
+function extractJsonPayload(text) {
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch (_) {
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        if (start === -1 || end === -1 || end <= start) return null;
+        try {
+            return JSON.parse(text.slice(start, end + 1));
+        } catch (_) {
+            return null;
+        }
+    }
+}
+
+function renderChatJson(payload) {
+    const sections = [];
+    if (payload.title || payload.summary) {
+        sections.push(`
+            <div class="chat-section">
+                <div class="chat-section-title"><span>🧠</span> ${htmlEscape(payload.title || 'AI Summary')}</div>
+                <div>${renderSafeText(payload.summary || '')}</div>
+            </div>
+        `);
+    }
+
+    if (Array.isArray(payload.highlights) && payload.highlights.length) {
+        const badges = payload.highlights.map(h => `<span class="chat-badge">${htmlEscape(h)}</span>`).join('');
+        sections.push(`
+            <div class="chat-section">
+                <div class="chat-section-title"><span>✨</span> Highlights</div>
+                <div class="chat-badges">${badges}</div>
+            </div>
+        `);
+    }
+
+    if (Array.isArray(payload.sections) && payload.sections.length) {
+        payload.sections.forEach(section => {
+            const title = htmlEscape(section.title || 'Details');
+            const bullets = (section.bullets || []).map(b => `<li>${renderSafeText(b)}</li>`).join('');
+            const list = bullets ? `<ul class="card-analysis-list">${bullets}</ul>` : '';
+            const note = section.note ? `<div class="card-analysis-summary">${renderSafeText(section.note)}</div>` : '';
+            sections.push(`
+                <div class="chat-section">
+                    <div class="chat-section-title"><span>📌</span> ${title}</div>
+                    ${note}
+                    ${list}
+                </div>
+            `);
+        });
+    }
+
+    if (Array.isArray(payload.tables) && payload.tables.length) {
+        payload.tables.forEach(table => {
+            sections.push(`
+                <div class="chat-section">
+                    <div class="chat-section-title"><span>📋</span> ${htmlEscape(table.title || 'Table')}</div>
+                    ${renderTableFromObject(table)}
+                </div>
+            `);
+        });
+    }
+
+    if (Array.isArray(payload.charts) && payload.charts.length) {
+        payload.charts.forEach(chart => {
+            sections.push(`
+                <div class="chat-section">
+                    <div class="chat-section-title"><span>📊</span> ${htmlEscape(chart.title || 'Chart')}</div>
+                    ${renderChartJSON(JSON.stringify(chart))}
+                </div>
+            `);
+        });
+    }
+
+    if (Array.isArray(payload.actions) && payload.actions.length) {
+        const actions = payload.actions.map(a => `<li>${renderSafeText(a)}</li>`).join('');
+        sections.push(`
+            <div class="chat-section">
+                <div class="chat-section-title"><span>✅</span> Recommendations</div>
+                <ul class="card-analysis-list">${actions}</ul>
+            </div>
+        `);
+    }
+
+    if (!sections.length) {
+        return htmlCardRender(JSON.stringify(payload, null, 2));
+    }
+
+    return `<div class="chat-json">${sections.join('')}</div>`;
+}
+
+function renderTableFromObject(table) {
+    if (!table || !Array.isArray(table.headers)) return '<div class="error-block">Invalid Table Data</div>';
+    const headersHtml = table.headers.map(h => `<th>${htmlEscape(String(h))}</th>`).join('');
+    const rowsHtml = (table.rows || []).map(row => {
+        const cells = (row || []).map(cell => `<td>${htmlEscape(String(cell))}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+    }).join('');
+    return `
+        <div class="table-container">
+            <table>
+                <thead><tr>${headersHtml}</tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderSafeText(text) {
+    return formatInline(text).replace(/\n/g, '<br>');
+}
+
+function formatInline(text) {
+    if (!text) return '';
+    let safe = htmlEscape(String(text));
+    safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    safe = safe.replace(/__(.*?)__/g, '<span class="text-underline">$1</span>');
+    safe = safe.replace(/==(.*?)==/g, '<span class="text-highlight">$1</span>');
+    safe = safe.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+    return safe;
 }
 
 async function toggleFavorite(id) {

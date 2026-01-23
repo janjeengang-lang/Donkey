@@ -195,6 +195,116 @@ body {
     overflow-x: auto;
 }
 
+.model-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 12px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    font-size: 12px;
+}
+
+.model-select label {
+    color: #94a3b8;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.model-select select {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none;
+}
+
+.model-select select:focus {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.card-analysis {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-analysis-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-analysis-summary {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #e2e8f0;
+}
+
+.card-analysis-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+    display: grid;
+    gap: 6px;
+}
+
+.chat-json {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chat-section {
+    padding-left: 12px;
+    border-left: 3px solid rgba(56, 189, 248, 0.5);
+}
+
+.chat-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chat-section-title span {
+    color: #38bdf8;
+}
+
+.chat-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chat-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #0f172a;
+    background: #38bdf8;
+}
+
 .filter-tab {
     padding: 8px 16px;
     background: transparent;
@@ -704,7 +814,7 @@ body {
    ========================================= */
 .chat-drawer {
     width: 400px;
-    background: #0f172a;
+    background: #0b0f16;
     /* Slightly lighter than main body */
     border-left: 1px solid #334155;
     display: flex;
@@ -730,7 +840,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    background: #162036;
+    background: #0f172a;
 }
 
 .chat-header h3 {
@@ -749,7 +859,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    background: #0f172a;
+    background: #0b0f16;
 }
 
 /* Chat Bubbles */
@@ -793,39 +903,45 @@ body {
 
 .message-content {
     background: transparent;
-    /* Remove bubble bg for cleaner look */
-    padding: 2px 0;
-    /* Minimal padding */
+    padding: 0;
     border-radius: 0;
     border: none;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-width: 85%;
-}
-
-/* User Message: Add subtle bubble */
-.message-bubble.user .message-content {
-    background: #2f2f2f;
-    /* Dark gray */
-    padding: 10px 16px;
-    border-radius: 12px;
-    border-top-right-radius: 2px;
+    max-width: 90%;
 }
 
 .message-text {
     font-size: 15px;
-    /* Slightly larger */
     line-height: 1.7;
-    color: #ececec;
-    /* Almost white */
+    color: #e2e8f0;
     white-space: pre-wrap;
 }
 
+.text-underline {
+    text-decoration: underline;
+    text-decoration-color: #38bdf8;
+    text-underline-offset: 3px;
+}
+
+.text-highlight {
+    background: rgba(56, 189, 248, 0.2);
+    color: #e2e8f0;
+    padding: 0 4px;
+    border-radius: 6px;
+}
+
+.message-text ul {
+    margin: 6px 0 0 18px;
+    display: grid;
+    gap: 6px;
+}
 
 .message-bubble.user .message-content {
-    background: var(--primary);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #0f172a;
+    padding: 10px 16px;
     border-radius: 16px;
     border-top-right-radius: 4px;
     border-color: transparent;
@@ -833,14 +949,14 @@ body {
 
 .message-bubble.user .message-text {
     color: #0f172a;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Chat Input */
 .chat-input-area {
     padding: 20px 24px 24px;
     border-top: 1px solid #1e293b;
-    background: #162036;
+    background: #0f172a;
 }
 
 .chat-input-box {
