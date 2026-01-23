@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Zepra Notes AI</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Reem+Kufi:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Poppins:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="notes.css">
+</head>
+
+<body>
+  <div class="noise"></div>
+  <div class="aurora"></div>
+  <header class="hero">
+    <div class="hero-left">
+      <div class="badge">ZEPRA NOTES AI</div>
+      <h1>Smart Notes Hub</h1>
+      <p class="subtitle">Turn raw notes into beautifully structured insights in seconds.</p>
+    </div>
+    <div class="hero-actions">
+      <button id="btnOpenHub" class="btn ghost">Open Notes Tool</button>
+      <button id="btnExportMode" class="btn primary">Export with AI</button>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Search notes..." />
+      <span class="search-icon">Search</span>
+    </div>
+    <div class="filters">
+      <select id="filterType">
+        <option value="all">All types</option>
+        <option value="manual">Manual</option>
+        <option value="selection">Select Text</option>
+        <option value="capture">Capture</option>
+      </select>
+      <select id="filterTag">
+        <option value="all">All tags</option>
+      </select>
+      <select id="generateModel">
+        <option value="">Generate model: Default</option>
+        <option value="qwen-3-480b">Generate model: Qwen 3 480B</option>
+        <option value="gpt-oss-120b">Generate model: GPT OSS 120B</option>
+      </select>
+      <button id="toggleDir" class="btn tiny">LTR</button>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total notes</div>
+      <div id="totalNotes" class="stat-value">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Selected for export</div>
+      <div id="selectedNotes" class="stat-value">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Last updated</div>
+      <div id="lastUpdated" class="stat-value">--</div>
+    </div>
+  </section>
+
+  <main>
+    <div id="notesGrid" class="notes-grid"></div>
+    <div id="emptyState" class="empty-state">
+      <div class="empty-emoji">NOTES</div>
+      <div class="empty-title">No notes yet</div>
+      <div class="empty-sub">Open Zepra Menu and choose Notes with AI to add your first note.</div>
+    </div>
+  </main>
+
+  <div id="exportBar" class="export-bar hidden">
+    <div class="export-left">
+      <span class="export-count">0</span>
+      <span>notes</span>
+    </div>
+
+    <div class="export-center">
+      <select id="exportStyle">
+        <option value="auto">✨ Auto Design</option>
+        <option value="timeline">📅 Timeline</option>
+        <option value="journal">📓 Journal</option>
+        <option value="board">📋 Board</option>
+        <option value="mindmap">🧠 Mindmap</option>
+      </select>
+      <select id="exportTone">
+        <option value="creative">🎨 Creative</option>
+        <option value="professional">💼 Professional</option>
+        <option value="minimal">⚡ Minimal</option>
+      </select>
+    </div>
+
+    <div class="export-style-box">
+      <input id="exportPrompt" type="text" placeholder="Design prompt (optional): elegant, colorful, dark theme..." />
+    </div>
+
+    <div class="export-actions">
+      <button id="btnGenerateExport" class="btn primary">🚀 Generate Export</button>
+      <button id="btnCancelExport" class="btn ghost">Cancel</button>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading hidden">
+    <div class="loader-wrapper">
+      <span class="loader-letter">G</span>
+      <span class="loader-letter">e</span>
+      <span class="loader-letter">n</span>
+      <span class="loader-letter">e</span>
+      <span class="loader-letter">r</span>
+      <span class="loader-letter">a</span>
+      <span class="loader-letter">t</span>
+      <span class="loader-letter">i</span>
+      <span class="loader-letter">n</span>
+      <span class="loader-letter">g</span>
+      <div class="loader"></div>
+    </div>
+    <div class="loading-text">Crafting your export layout...</div>
+    <div class="loading-steps">
+      <div data-step>Collecting notes</div>
+      <div data-step>Mapping layout grid</div>
+      <div data-step>Designing visual hierarchy</div>
+      <div data-step>Polishing typography</div>
+      <div data-step>Finalizing PDF</div>
+    </div>
+  </div>
+
+  <script src="notes.js"></script>
+</body>
+
+</html>
