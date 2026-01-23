@@ -5582,8 +5582,8 @@ function init() {
             });
 
             if (answerEl) {
-              answerEl.innerHTML = parseMarkdown(answer || 'No answer provided');
-              answerEl.style.display = 'block';
+              const answerText = answer || 'No answer provided';
+              renderAnswerToElement(answerText, answerEl);
               answerEl.setAttribute('dir', 'auto');
               console.log('Answer set:', answer);
             }
@@ -5627,8 +5627,7 @@ function init() {
         } else {
           const ansEl = modal.querySelector('.answer-text');
           if (ansEl) {
-            ansEl.style.display = 'block';
-            ansEl.innerHTML = parseMarkdown(answer);
+            renderAnswerToElement(answer, ansEl);
             console.log('Single answer set:', answer);
           }
 
@@ -6999,66 +6998,63 @@ function init() {
 
   function parseMarkdown(text) {
     if (!text) return '';
-    // 1. Separation and Extraction of Artifacts
-    let html = '';
-    const artifactRegex = /:::artifact([\s\S]*?):::/g;
-    let lastIndex = 0;
-    let match;
 
-    while ((match = artifactRegex.exec(text)) !== null) {
-      // Process text before the artifact
-      const textBefore = text.slice(lastIndex, match.index);
-      html += processMarkdownText(textBefore);
+    // 1. Remove Artifact tags if present (handled separately)
+    let html = text.replace(/:::artifact[\s\S]*?:::/g, '[UI Component Generated]');
 
-      // Render the artifact widget
-      html += renderArtifactWidget(match[1].trim());
+    // 2. Escape HTML characters to prevent injection
+    html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      lastIndex = artifactRegex.lastIndex;
-    }
+    // 3. Headers (Green & Bold)
+    html = html.replace(/^### (.*$)/gim, '<h3 style="color:#10B981; font-weight:700; margin:12px 0 8px; font-size:1.1em;">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 style="color:#e2e8f0; font-weight:800; margin:16px 0 10px; border-bottom:1px solid #334155;">$1</h2>');
 
-    // Process remaining text
-    const remainingText = text.slice(lastIndex);
-    html += processMarkdownText(remainingText);
+    // 4. Bold & Italic
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong style="color:#34d399;">$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em style="color:#94a3b8;">$1</em>');
 
-    return html;
-  }
+    // 5. Code Blocks (Dark Container)
+    html = html.replace(/\`\`\`(\w+)?\n([\s\S]*?)\`\`\`/g, '<pre style="background:#020617; border:1px solid #1e293b; padding:12px; border-radius:8px; overflow-x:auto; margin:10px 0; color:#e2e8f0; font-family:monospace; font-size:0.9em;">$2</pre>');
 
-  function processMarkdownText(text) {
-    if (!text) return '';
-    let html = text;
+    // 6. Inline Code
+    html = html.replace(/\`([^`]+)\`/g, '<code style="background:rgba(16,185,129,0.1); color:#34d399; padding:2px 5px; border-radius:4px; font-family:monospace;">$1</code>');
 
-    // 2. Headers
-    html = html.replace(/^### (.*$)/gim, '<h3 style="color:#10B981; font-weight:bold; margin-top:10px;">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 style="color:#e2e8f0; font-size:1.1em; font-weight:bold; margin-top:15px; border-bottom:1px solid #334155; padding-bottom:5px;">$1</h2>');
+    // 7. Lists
+    html = html.replace(/^\s*-\s+(.*$)/gim, '<li style="margin-left:20px; color:#cbd5e1; list-style-type:disc;">$1</li>');
+    html = html.replace(/^\s*\d+\.\s+(.*$)/gim, '<li style="margin-left:20px; color:#cbd5e1; list-style-type:decimal;">$1</li>');
 
-    // 3. Bold
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<b style="color:#10B981;">$1</b>');
-
-    // 4. Code Blocks
-    html = html.replace(/```(\w+)?([\s\S]*?)```/g, (match, lang, code) => {
-      return `<pre style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155; overflow-x:auto; color:#a5b4fc; font-family:monospace; margin:10px 0; position:relative;">
-        <div style="position:absolute; top:4px; right:8px; font-size:10px; color:#64748b;">${lang || ''}</div>
-        ${htmlEscape(code.trim())}
-      </pre>`;
-    });
-
-    // 5. Inline Code
-    html = html.replace(/\`([^`]+)\`/g, '<code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px; color:#f472b6;">$1</code>');
-
-    // 6. Bullet Points
-    html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin-left:20px; color:#cbd5e1; margin-bottom:4px;">$1</li>');
-
-    // 7. Line breaks to <br>
+    // 8. Line Breaks
     html = html.replace(/\n/g, '<br>');
 
-    return html;
+    return `<div style="line-height:1.6; font-size:14px; color:#e2e8f0;">${html}</div>`;
   }
 
-  function renderArtifactWidget(htmlContent) {
+  function renderAnswerToElement(answer, answerEl) {
+    if (!answerEl) return;
+    if (answer.includes(':::artifact')) {
+      answerEl.innerHTML = '';
+      const parts = answer.split(/:::artifact([\s\S]*?):::/);
+      parts.forEach((part, index) => {
+        if (index % 2 === 1) {
+          renderArtifactWidget(part, answerEl);
+        } else if (part.trim()) {
+          const div = document.createElement('div');
+          div.innerHTML = parseMarkdown(part);
+          answerEl.appendChild(div);
+        }
+      });
+    } else {
+      answerEl.innerHTML = parseMarkdown(answer);
+    }
+
+    answerEl.style.display = 'block';
+  }
+
+  function renderArtifactWidget(htmlContent, container) {
     const id = 'artifact-' + Math.random().toString(36).substr(2, 9);
     const escapedHtml = htmlEscape(htmlContent);
 
-    return `
+    const widget = `
       <div id="${id}" class="artifact-widget" style="border:1px solid #10B981; background:#0f172a; border-radius:12px; margin:15px 0; overflow:hidden; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3);">
         <div class="artifact-toolbar" style="background:#111827; padding:10px 15px; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
           <span style="color:#10B981; font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
@@ -7075,6 +7071,13 @@ function init() {
         </div>
       </div>
     `;
+    if (container) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = widget;
+      container.appendChild(wrapper.firstElementChild);
+      return '';
+    }
+    return widget;
   }
 
   function htmlEscape(str) {
@@ -7129,56 +7132,26 @@ function init() {
   }
 
   function buildPrompt(mode, question, context, opts = {}) {
-    const { withReason = false, reasonLang = 'English', thinking = false, persona = {} } = opts;
-
-    // Detect Design Mode
-    const designKeywords = ['ui', 'design', 'dashboard', 'button', 'widget', 'تصميم', 'نافذة', 'واجهة'];
-    const isDesignRequest = designKeywords.some(k => question.toLowerCase().includes(k));
-
     const systemPersona = `
-You are Zepra, an Advanced Intelligence Engine specialized in Content Analysis & Code Optimization.
-Your output generally targets professional developers and power users.
+You are Zepra, an elite AI Clipboard Analyst & Engineering Companion.
+Your Goal: Provide deep, structured, and visually clean insights based on the user's text/code.
 
-🧠 **OPERATIONAL PROTOCOL (STRICT):**
-1. **DO NOT RUSH.** Before answering, perform a deep analysis of the user's text/clipboard.
-2. **FORMATTING:** Use clear Markdown headers (##), bullet points, and code blocks.
-3. **CLIPBOARD MODE (DEFAULT):** If the user provides code or text, explain it, debug it, or summarize it strictly. Do NOT offer to build a website unless asked.
-4. **DESIGN MODE (EXPLICIT ONLY):** ONLY if the user asks for "UI", "Design", or "Widget", generate the HTML/Tailwind artifact wrapped in :::artifact tags.
+🧠 **PROTOCOL:**
+1.  **ANALYZE FIRST:** Do not rush. Read the user's input carefully.
+2.  **FORMATTING:** You MUST use Markdown. Use '###' for headers, '**' for bold, and '\`\`\`' for code blocks.
+3.  **SCOPE:**
+    - If input is Code: Explain it, debug it, or optimize it. Use code blocks.
+    - If input is Text: Summarize or analyze it. Use bullet points.
+    - **DESIGN TRAP:** Do NOT generate HTML/UI code unless explicitly asked to "Design" or "Create a Widget".
 
-📝 **RESPONSE STRUCTURE:**
-- **Insight:** Start with a brief, high-level summary of what you found.
-- **Deep Dive:** Provide detailed explanation, corrected code, or analysis. Use Lists!
-- **Conclusion:** Next steps or suggestions.
-
-🚫 **NEGATIVE CONSTRAINTS:**
-- Never give one-sentence answers.
-- Never output raw separators like "---" inside the text flow.
-- Always use syntax highlighting for code blocks (e.g., \`\`\`javascript).
+📝 **RESPONSE TEMPLATE:**
+-   **🎯 Analysis:** Brief high-level summary.
+-   **🔍 Details:** The core explanation/correction (use lists/code).
+-   **💡 Recommendation:** Actionable advice.
 `;
 
-    let rules = systemPersona + '\n\n';
-
-    if (isDesignRequest) {
-      rules += `🎨 **DESIGN MODE ACTIVE:** Generate a professional Emerald Matrix themed (#10B981) HTML/Tailwind artifact. Wrap it in :::artifact ... ::: tags.\n`;
-    }
-
-    if (withReason) {
-      rules += `STRICT OUTPUT FORMAT:\n- Output ONLY JSON: {"answer": "", "reason": ""}.\n`;
-      rules += `- "answer" must follow the formatting rules above. "reason" (in ${reasonLang}) explains the analysis.\n`;
-    }
-
-    const ctxLines = (context || []).map((c, i) => `Context Q${i + 1}: ${c.q}\nContext A${i + 1}: ${c.a}`).join('\n');
-
-    return `${rules}
-${persona.personaEnabled ? `Active Persona: ${persona.personaActiveName}\n` : ''}
-
-PRIOR CONTEXT:
-${ctxLines || 'None'}
-
-QUESTION:
-${question}
-
-AI RESPONSE:`;
+    const ctxLines = (context || []).map((c, i) => `Q${i + 1}: ${c.q}\nA${i + 1}: ${c.a}`).join('\n');
+    return `${systemPersona}\n\nCONTEXT:\n${ctxLines || 'None'}\n\nUSER INPUT:\n${question}\n\nRESPONSE:`;
   }
 
   function buildPromptHeader({ personaEnabled, personaName, personaPrompt, humanErrorRate = 0, mode = 'auto' } = {}) {
