@@ -1117,7 +1117,7 @@ ${STRICT_JSON}`;
           const { text, sourceUrl, sourceTitle } = message;
           (async () => {
             try {
-              const { zepraClipboard = [], clipboardAI = false } = await chrome.storage.local.get(['zepraClipboard', 'clipboardAI']);
+              const { zepraClipboard = [], clipboardAI = false, clipboardModel = '' } = await chrome.storage.local.get(['zepraClipboard', 'clipboardAI', 'clipboardModel']);
 
               if (zepraClipboard.length > 0 && zepraClipboard[0].text === text) return;
 
@@ -1160,7 +1160,7 @@ Respond ONLY with this JSON structure:
 }
 ${STRICT_JSON}`;
 
-                callGenerativeModel(prompt, { temperature: 0.2 }).then(res => {
+                callGenerativeModel(prompt, { temperature: 0.2, model: clipboardModel || undefined }).then(res => {
                   const metadata = parseJSONSafe(res);
                   if (metadata) {
                     chrome.storage.local.get('zepraClipboard', (d) => {
@@ -1187,7 +1187,7 @@ ${STRICT_JSON}`;
         }
 
         case 'CHAT_WITH_AI': {
-          const { prompt, history = [] } = message;
+          const { prompt, history = [], model = '' } = message;
           try {
             const conversation = history.map(h => `${h.role === 'user' ? 'User' : 'AI'}: ${h.text}`).join('\n');
             // Detect if user wants design/UI generation
@@ -1244,31 +1244,29 @@ AI Design:`
 You are a helpful AI that analyzes, explains, and improves text. Your PRIMARY goal is to help users understand their clipboard content.
 
 🎯 CORE BEHAVIORS:
-1. **Analyze & Explain**: If user asks about the text, explain it clearly
-2. **Summarize**: Provide concise summaries when requested
-3. **Fix & Improve**: Correct grammar, improve clarity, translate
-4. **Answer Questions**: Use the clipboard context to answer
-5. **Be Concise**: Keep responses focused and helpful
+1. Analyze & explain code/text deeply with context-aware reasoning.
+2. Provide clear summaries and actionable recommendations.
+3. If the user asks for data views, create concise tables or charts.
+4. Respect the clipboard context; do not drift to unrelated topics.
 
-✨ RICH FORMATTING (Use These):
-- **Emojis**: 🚀 💡 ✅ ⚠️ 📊 (in headers/lists)
-- **Highlights**: <mark style="background: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px;">Important Text</mark>
-- **Bold**: **Key Points**
-- **Underline**: <u>Emphasis</u>
-- **Strikethrough**: <s>Deprecated</s>
-- **Lists**: Use bullet points, never long paragraphs
-
-🚫 DO NOT:
-- Generate HTML/CSS unless explicitly asked
-- Offer to "design a website" unprompted
-- Create dashboards/widgets without request
-
-📝 RESPONSE STYLE:
-- Clear, structured, emoji-enhanced
-- Use green highlights for key terms
-- Bullet points over paragraphs
-- Professional but friendly
-
+🧾 OUTPUT FORMAT (STRICT):
+Respond ONLY with valid JSON (no markdown, no extra text).
+Schema:
+{
+  "title": "Short descriptive title",
+  "summary": "2-4 sentence professional summary",
+  "highlights": ["Key highlight 1", "Key highlight 2"],
+  "sections": [
+    { "title": "Section title", "bullets": ["Point 1", "Point 2"], "note": "Optional short note" }
+  ],
+  "tables": [
+    { "title": "Optional table title", "headers": ["Col1", "Col2"], "rows": [["A", "B"], ["C", "D"]] }
+  ],
+  "charts": [
+    { "title": "Optional chart title", "type": "bar", "data": [{"label": "Item", "value": 42, "color": "#38bdf8"}] }
+  ],
+  "actions": ["Recommendation 1", "Recommendation 2"]
+}
 
 Conversation History:
 ${conversation}
@@ -1277,17 +1275,10 @@ User Question: ${prompt}
 AI Response:`;
 
             // Try to get a clean text response
-            const response = await callGenerativeModel(fullPrompt, { temperature: 0.7 });
+            const response = await callGenerativeModel(fullPrompt, { temperature: 0.7, model: model || undefined });
 
             // Safety: Ensure response is a string
             let finalText = typeof response === 'string' ? response : JSON.stringify(response);
-
-            // Edge Case: If AI returns raw JSON without backticks, wrap it for the frontend smart renderer
-            if (finalText.trim().startsWith('{') && (finalText.includes('"headers"') || finalText.includes('"data"'))) {
-              // It's likely a table or chart sent as raw JSON
-              if (finalText.includes('"headers"')) finalText = '```json:table\n' + finalText + '\n```';
-              else if (finalText.includes('"data"')) finalText = '```json:chart\n' + finalText + '\n```';
-            }
 
             // Try to extract text if it's wrapped in a JSON wrapper object (Gemini sometimes does this)
             if (finalText.trim().startsWith('{')) {
