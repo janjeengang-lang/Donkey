@@ -92,6 +92,7 @@
       "js": [
         "voice_manager.js",
         "dubbing/zepra_audio_core.js",
+        "dubbing/dub_bridge.js",
         "dubbing/scout_manager.js",
         "dubbing/dubbing_studio.js",
         "dubbing/dubbing_manager.js",
