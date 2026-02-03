@@ -2095,7 +2095,7 @@ class DubbingAPIService {
     const response = await fetch(this.apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.apiKey}` },
-      body: JSON.stringify({ model: 'llama3.1-8b', messages: messages, temperature: 0.7, max_completion_tokens: 100 })
+      body: JSON.stringify({ model: 'llama-3.3-70b', messages: messages, temperature: 0.3, max_completion_tokens: 250 })
     });
     if (!response.ok) throw new Error("API Request Failed");
     return await response.json();
@@ -2450,8 +2450,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         case 'TRANSLATE_BATCH': {
-          const prompt = `Translate the following subtitle text to ${message.targetLanguage || 'English'}. Return ONLY the translation, no quotes, no explanation. Text: ${message.text}`;
-          const result = await callGenerativeModel(prompt, { temperature: 0.3, max_completion_tokens: 150 });
+          const targetLanguage = message.targetLanguage || 'English';
+          const rawSegments = Array.isArray(message.segments) ? message.segments : [];
+          if (rawSegments.length > 0) {
+            const segments = rawSegments.map((segment) => String(segment || '').trim()).filter(Boolean);
+            if (segments.length === 0) {
+              sendResponse({ translatedSegments: [], translated: '' });
+              break;
+            }
+            const prompt = `Translate each line into ${targetLanguage}. Return ONLY the translations, one per line, same order, no numbering or extra text.\n\n${segments.join('\n')}`;
+            const result = await callGenerativeModel(prompt, {
+              temperature: 0.2,
+              max_completion_tokens: 500,
+              model: 'llama-3.3-70b'
+            });
+            const cleanResult = result.replace(/^[`'"]+|[`'"]+$/g, '').trim();
+            let lines = cleanResult.split(/\r?\n/).map((line) => line.replace(/^(Translation:|Answer:)\s*/i, '').trim()).filter(Boolean);
+            if (lines.length === 1 && segments.length > 1) {
+              lines = [cleanResult.trim()];
+            }
+            const translatedSegments = segments.map((_, index) => lines[index] || lines[0] || '');
+            sendResponse({ translatedSegments, translated: translatedSegments.join(' ') });
+            break;
+          }
+
+          const prompt = `Translate the following subtitle text to ${targetLanguage}. Return ONLY the translation, no quotes, no explanation. Text: ${message.text}`;
+          const result = await callGenerativeModel(prompt, { temperature: 0.3, max_completion_tokens: 250, model: 'llama-3.3-70b' });
           let clean = result.replace(/^(Here is|Translation:|Answer:)/i, '').replace(/^[\`'\""]+|[\`'\""]+$/g, '').trim();
           if (clean.startsWith('{')) { try { clean = JSON.parse(clean).answer || clean; } catch (e) { } }
           sendResponse({ translated: clean });
