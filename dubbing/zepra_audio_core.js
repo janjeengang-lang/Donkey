@@ -14,7 +14,11 @@
 const ZEPRA_CORE_CONFIG = {
     OFFSCREEN_PATH: 'offscreen.html',
     HEARTBEAT_INTERVAL: 2000,
-    MAX_RETRY_ATTEMPTS: 3
+    MAX_RETRY_ATTEMPTS: 3,
+    TRANSLATION_FLUSH_DELAY_MS: 1200,
+    TRANSLATION_MIN_INTERVAL_MS: 3000,
+    TRANSLATION_MAX_SEGMENTS: 4,
+    TRANSLATION_MAX_CHARS: 600
 };
 
 class ZepraAudioCore {
@@ -43,6 +47,11 @@ class ZepraAudioCore {
         this._heartbeat = null;
         this._watchdogTimer = null;
         this.recognition = null;
+        this._pendingSegments = [];
+        this._batchTimer = null;
+        this._lastTranslateAt = 0;
+        this._ttsQueue = [];
+        this._isSpeaking = false;
 
         // Bindings
         this.handleRuntimeMessage = this.handleRuntimeMessage.bind(this);
@@ -86,6 +95,12 @@ class ZepraAudioCore {
 
         this._stopOffscreen();
         this._restoreVideoAudio();
+        if (this._batchTimer) clearTimeout(this._batchTimer);
+        this._batchTimer = null;
+        this._pendingSegments = [];
+        this._ttsQueue = [];
+        this._isSpeaking = false;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
         this.setStatus('IDLE', "Engine Stopped");
         this.log("Engine Stopped.");
     }
@@ -276,67 +291,96 @@ class ZepraAudioCore {
             type: msg.final ? 'final' : 'interim'
         });
 
-        // 1. Instant Translation (Interim) - The "Magic" Speed Layer (Google Hack)
-        if (msg.interim && msg.interim.trim().length > 0) {
-            // Smart throttling: Don't spam the API on every character (every ~300ms is standard)
-            const now = Date.now();
-            if (!this._lastInterimTime || now - this._lastInterimTime > 300) {
-                this._lastInterimTime = now;
-                chrome.runtime.sendMessage({
-                    type: 'TRANSLATE_INSTANT',
-                    text: msg.interim,
-                    source: this.sourceLang,
-                    target: this.targetLang
-                }, (response) => {
-                    if (response && response.ok) {
-                        this._emit('translation', {
-                            text: response.text,
-                            status: 'translating',
-                            type: 'interim'
-                        });
-                    } else {
-                        // CRITICAL: Emit error so UI shows it
-                        this._emit('translation', {
-                            text: `Err: ${response ? response.error : 'No Res'}`,
-                            status: 'error',
-                            type: 'interim'
-                        });
-                        this.log(`Translation Error: ${response ? response.error : 'Timeout/NoResponse'}`, 'error');
-                    }
-                });
-            }
-        }
-
-        // 2. High-Quality Translation (Final) - Cerebras Llama 3
         if (msg.final && msg.final.trim().length > 0) {
             this.log(`Final Transcript: ${msg.final}`);
-            this._triggerTranslation(msg.final);
+            this._queueTranslation(msg.final);
         }
     }
 
-    async _triggerTranslation(text) {
+    _queueTranslation(text) {
+        const segments = this._splitIntoSegments(text);
+        if (!segments.length) return;
+        this._pendingSegments.push(...segments);
+        this._scheduleBatchTranslation();
+    }
+
+    _splitIntoSegments(text) {
+        const cleaned = text.replace(/\s+/g, ' ').trim();
+        if (!cleaned) return [];
+        const matches = cleaned.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+        return matches.map((segment) => segment.trim()).filter(Boolean);
+    }
+
+    _scheduleBatchTranslation() {
+        if (this._batchTimer) return;
+        this._batchTimer = setTimeout(() => {
+            this._batchTimer = null;
+            this._flushTranslationBatch();
+        }, ZEPRA_CORE_CONFIG.TRANSLATION_FLUSH_DELAY_MS);
+    }
+
+    _flushTranslationBatch() {
+        if (!this._pendingSegments.length) return;
+
+        const now = Date.now();
+        const waitMs = ZEPRA_CORE_CONFIG.TRANSLATION_MIN_INTERVAL_MS - (now - this._lastTranslateAt);
+        if (waitMs > 0) {
+            this._batchTimer = setTimeout(() => {
+                this._batchTimer = null;
+                this._flushTranslationBatch();
+            }, waitMs);
+            return;
+        }
+
+        const batch = [];
+        let charCount = 0;
+        while (this._pendingSegments.length > 0 && batch.length < ZEPRA_CORE_CONFIG.TRANSLATION_MAX_SEGMENTS) {
+            const next = this._pendingSegments[0];
+            if (charCount + next.length > ZEPRA_CORE_CONFIG.TRANSLATION_MAX_CHARS && batch.length > 0) break;
+            batch.push(this._pendingSegments.shift());
+            charCount += next.length;
+        }
+
+        if (!batch.length) return;
+        this._lastTranslateAt = Date.now();
         this._emit('translation', { status: 'translating', text: "...", type: 'final' });
 
-        // Send to Background for Translation (reusing existing secure pipeline)
         chrome.runtime.sendMessage({
             type: 'TRANSLATE_BATCH',
-            text: text,
+            segments: batch,
             targetLanguage: this.targetLang
         }, (res) => {
-            if (res && res.translated) {
-                this.log(`Translated (Final): ${res.translated}`);
+            const translatedSegments = res?.translatedSegments || (res?.translated ? [res.translated] : []);
+            if (!translatedSegments.length) {
+                this.log("Translation failed or returned empty.");
+                return;
+            }
+
+            translatedSegments.forEach((segment) => {
+                const cleanSegment = String(segment || '').trim();
+                if (!cleanSegment) return;
+                this.log(`Translated (Final): ${cleanSegment}`);
                 this._emit('translation', {
                     status: 'complete',
-                    text: res.translated,
+                    text: cleanSegment,
                     type: 'final'
                 });
-
-                // Only Synthesize Speech for Final Translations
-                this._synthesizeSpeech(res.translated);
-            } else {
-                this.log("Translation failed or returned empty.");
-            }
+                this._enqueueSpeech(cleanSegment);
+            });
         });
+    }
+
+    _enqueueSpeech(text) {
+        if (!text || !text.trim()) return;
+        this._ttsQueue.push(text);
+        this._processSpeechQueue();
+    }
+
+    _processSpeechQueue() {
+        if (this._isSpeaking || this._ttsQueue.length === 0) return;
+        const text = this._ttsQueue.shift();
+        this._isSpeaking = true;
+        this._synthesizeSpeech(text);
     }
 
     _synthesizeSpeech(text) {
@@ -373,16 +417,18 @@ class ZepraAudioCore {
                     this._restoreVideoAudio(0.8);
                 }
             }, 500);
+            this._isSpeaking = false;
+            this._processSpeechQueue();
         };
 
         u.onerror = (e) => {
             console.error("[ZEPRA CORE] TTS Error:", e);
             // Restore audio on error too
             if (this.activeVideo) this.activeVideo.volume = 0.8;
+            this._isSpeaking = false;
+            this._processSpeechQueue();
         };
 
-        // Cancel any ongoing speech and speak new text
-        window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
     }
 
