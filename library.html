@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zepra Website Library</title>
+    <link rel="stylesheet" href="library.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="library-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                <div>
+                    <h1>Website Library</h1>
+                    <p>Your curated collection of websites</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <input type="text" id="searchInput" placeholder="Search websites..." class="search-input">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="Tools">Tools</option>
+                    <option value="News">News</option>
+                    <option value="Dev">Development</option>
+                    <option value="Design">Design</option>
+                    <option value="Learning">Learning</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="library-main">
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            <h2>No websites saved yet</h2>
+            <p>Start building your library by saving websites from any page</p>
+        </div>
+
+        <!-- Sites Grid -->
+        <div id="sitesGrid" class="sites-grid"></div>
+    </main>
+
+    <!-- Card Template -->
+    <template id="siteCardTemplate">
+        <article class="site-card">
+            <div class="card-image">
+                <img src="" alt="" class="cover-image">
+                <div class="image-overlay"></div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title"></h3>
+                <p class="card-brief"></p>
+                <div class="ai-analysis-box">
+                    <div class="ai-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a7 7 0 0 0-7 7v4a7 7 0 0 0 7 7 7 7 0 0 0 7-7V9a7 7 0 0 0-7-7z" />
+                            <path d="M9 9h6" />
+                            <path d="M9 13h6" />
+                        </svg>
+                        AI Analysis
+                    </div>
+                    <p class="ai-analysis-text"></p>
+                </div>
+                <div class="card-meta">
+                    <div class="tags-container"></div>
+                    <div class="rating-stars"></div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-visit">Visit</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <script src="library.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,118 @@
+/* Zepra Voice - Iconless RGB Orb & Smart Text Pill */
+
+/* Container */
+.zepra-voice-dock {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+    z-index: 2147483647;
+    gap: 12px;
+}
+
+/* 1. Text Pill (Limited to 7 words via JS) */
+.z-text-preview {
+    background: rgba(15, 23, 42, 0.9);
+    /* Deep Navy/Black */
+    color: #4ade80;
+    /* Vibrant Green */
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+    backdrop-filter: blur(8px);
+    max-width: 80vw;
+}
+
+.z-text-preview.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 2. The 3D Orb (No Icon, Pure Color) */
+.z-mic-orb {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+
+    /* 3D Gradient */
+    background: radial-gradient(circle at 35% 35%,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(74, 222, 128, 1) 30%,
+            rgb(21, 128, 61) 80%,
+            rgb(10, 50, 20) 100%);
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.3),
+        inset 0 -5px 15px rgba(0, 0, 0, 0.2);
+
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.2s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Active Audio State - Color Cycle & Pulse */
+.z-mic-orb.active {
+    animation:
+        z-breathe 2s ease-in-out infinite,
+        z-hue-cycle 3s linear infinite;
+    /* Color changing! */
+    box-shadow: 0 0 40px rgba(74, 222, 128, 0.5);
+}
+
+/* Idle State - Gentle Breathe */
+.z-mic-orb:not(.active) {
+    animation: z-breathe 4s ease-in-out infinite;
+    filter: saturate(0.5);
+    /* Dimmer when not talking */
+}
+
+@keyframes z-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes z-hue-cycle {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Hover Scale */
+.z-mic-orb:hover {
+    transform: scale(1.15) !important;
+    /* Force scale override */
+}
+
+.z-stop-hint {
+    display: none;
+    /* User asked to remove extra text like "STOP" inside, keep clean */
+}

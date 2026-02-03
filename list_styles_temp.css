@@ -1,0 +1,50 @@
+/* Lists - ENHANCED STYLING */
+.zepra-msg.ai ul,
+.zepra-msg.ai ol {
+    margin: 1em 0;
+    padding-left: 24px;
+    line-height: 1.8;
+}
+
+.zepra-msg.ai ul li {
+    margin: 0.5em 0;
+    position: relative;
+}
+
+.zepra-msg.ai ul li::marker {
+    color: #10b981;
+    font-size: 1.2em;
+}
+
+.zepra-msg.ai ol li {
+    margin: 0.5em 0;
+}
+
+.zepra-msg.ai ol li::marker {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Paragraphs */
+.zepra-msg.ai p {
+    margin: 0.8em 0;
+    line-height: 1.7;
+}
+
+/* Horizontal Rules */
+.zepra-msg.ai hr {
+    border: none;
+    border-top: 1px solid #27272a;
+    margin: 1.5em 0;
+}
+
+/* Strong and Emphasis */
+.zepra-msg.ai strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.zepra-msg.ai em {
+    color: #a1a1aa;
+    font-style: italic;
+}

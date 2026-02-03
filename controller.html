@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Zepra Controller</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+            margin: 0;
+            user-select: none;
+        }
+
+        .header {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        button {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #334155;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-magnet {
+            color: #60a5fa;
+        }
+
+        .btn-mute {
+            color: #f87171;
+        }
+
+        .btn-close {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            margin-top: auto;
+        }
+
+        .btn-close:hover {
+            background: #dc2626;
+        }
+
+        /* Lock Toggle */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e293b;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .toggle-row:hover {
+            background: #334155;
+        }
+
+        /* Hero Section */
+        #heroSection {
+            background: #0b1220;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .hero-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .hero-btn {
+            padding: 2px 8px;
+            font-size: 10px;
+            background: #fbbf24;
+            color: #000;
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .hero-btn:hover {
+            background: #f59e0b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">Zepra Workspace</div>
+
+    <!-- Magnet -->
+    <button id="magnetBtn" class="btn-magnet">
+        <span>🧲</span> Restore Layout
+    </button>
+
+    <!-- Lock Layout -->
+    <label class="toggle-row">
+        <span>🔒 Freeze Windows</span>
+        <input type="checkbox" id="lockLayoutFn">
+    </label>
+
+    <!-- Mute -->
+    <button id="muteBtn" class="btn-mute">
+        <span>🔇</span> Mute/Unmute All
+    </button>
+
+    <!-- Hero List (Dynamic) -->
+    <div id="heroSection">
+        <div class="header" style="text-align:left; font-size:10px;">Make Hero (Switch Main)</div>
+        <div id="windowList"></div>
+    </div>
+
+    <!-- Close -->
+    <button id="closeAllBtn" class="btn-close">
+        Close Workspace
+    </button>
+
+    <script src="controller.js"></script>
+</body>
+
+</html>

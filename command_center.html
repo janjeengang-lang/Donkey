@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zepra Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="command_center.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo-area">
+                <h1>Zepra Command Center</h1>
+                <p>Multi-Window Workspace Manager</p>
+            </div>
+            <button id="createProfileBtn" class="btn-primary">
+                <span>+</span> New Profile
+            </button>
+        </header>
+
+        <main class="dashboard-grid" id="profileGrid">
+            <!-- Profiles will be injected here as Folder Components -->
+        </main>
+    </div>
+
+    <!-- Create Profile Modal -->
+    <div id="createModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Workspace Profile</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Profile Name</label>
+                    <input type="text" id="profileName" placeholder="e.g., Social Media, Research, Crypto">
+                </div>
+
+                <div class="url-inputs">
+                    <label>Workspace Websites (Max 4)</label>
+                    <div class="input-row">
+                        <span class="window-num">1</span>
+                        <input type="url" class="url-input" placeholder="https://..." data-index="0">
+                    </div>
+                    <div class="input-row">
+                        <span class="window-num">2</span>
+                        <input type="url" class="url-input" placeholder="https://..." data-index="1">
+                    </div>
+                    <div class="input-row">
+                        <span class="window-num">3</span>
+                        <input type="url" class="url-input" placeholder="https://..." data-index="2">
+                    </div>
+                    <div class="input-row">
+                        <span class="window-num">4</span>
+                        <input type="url" class="url-input" placeholder="https://..." data-index="3">
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="incognitoMode">
+                    <label for="incognitoMode">Launch in Incognito Mode</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary close-modal">Cancel</button>
+                <button id="saveProfileBtn" class="btn-save">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="command_center.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1209 @@
+/* =========================================
+   ASK ZEPRA - PRO BLACK & SILVER THEME
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:host {
+    all: initial;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    z-index: 2147483647;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    display: block;
+    /* Ensure host is present but invisible */
+    opacity: 0;
+    /* Extra safety against flicker */
+    transition: opacity 0.1s ease;
+    --z-bg: #09090b;
+    /* Zinc 950 - Deep Black */
+    --z-surface: #18181b;
+    /* Zinc 900 - Surface */
+    --z-border: #27272a;
+    /* Zinc 800 - Border */
+    --z-text: #e4e4e7;
+    /* Zinc 200 - Main Text */
+    --z-dim: #a1a1aa;
+    /* Zinc 400 - Dim Text */
+    --z-accent: #f4f4f5;
+    /* Zinc 100 - White Accent */
+    --z-green: #00ff88;
+    /* Neon Green - Our Brand */
+    --z-glass: rgba(9, 9, 11, 0.95);
+    /* Slightly darker for better contrast */
+    --z-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+::selection {
+    background: rgba(0, 255, 136, 0.3);
+    color: #fff;
+}
+
+/* --- TRIGGER BUTTON (THE SPARKLE) --- */
+.zepra-trigger {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    /* No background as requested */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    pointer-events: auto;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+.zepra-trigger.visible {
+    opacity: 1;
+    transform: scale(1);
+    animation: zepraBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.zepra-trigger svg {
+    width: 24px;
+    height: 24px;
+    color: #00ff88;
+    /* Neon Green */
+    fill: currentColor;
+}
+
+.zepra-trigger:hover svg {
+    color: #00cc6a;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.6));
+}
+
+@keyframes zepraBounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- MODAL (THE MAIN WINDOW) --- */
+.zepra-modal {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 480px;
+    max-width: calc(100vw - 40px);
+    height: 650px;
+    max-height: calc(100vh - 40px);
+    background: var(--z-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--z-border);
+    border-radius: 20px;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    pointer-events: auto;
+    color: var(--z-text);
+    font-size: 14px;
+}
+
+.zepra-modal.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* --- HEADER --- */
+.zepra-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(24, 24, 27, 0.6);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--z-border);
+    cursor: move;
+    flex-shrink: 0;
+}
+
+.zepra-brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.zepra-brand-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+.zepra-brand-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #000;
+}
+
+.zepra-brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.zepra-brand-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--z-accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.zepra-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: #000;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.zepra-brand-subtitle {
+    font-size: 11px;
+    color: var(--z-dim);
+}
+
+.zepra-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.zepra-action-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--z-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zepra-action-btn svg {
+    width: 14px;
+    height: 14px;
+    color: var(--z-dim);
+}
+
+.zepra-action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--z-green);
+}
+
+.zepra-action-btn:hover svg {
+    color: var(--z-green);
+}
+
+/* --- CONTENT AREA --- */
+.zepra-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- WELCOME SCREEN --- */
+.zepra-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    width: 100%;
+    animation: fadeIn 0.4s ease;
+    overflow-y: auto;
+    overflow-x: visible;
+    flex: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.zepra-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.3));
+}
+
+.zepra-greeting {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.zepra-greeting p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--z-text);
+}
+
+.zepra-user-name {
+    color: var(--z-green);
+    font-weight: 600;
+}
+
+.zepra-subtitle {
+    font-size: 13px;
+    color: var(--z-dim);
+    margin-top: 4px !important;
+}
+
+.zepra-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    z-index: 10;
+    position: relative;
+}
+
+.zepra-action-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--z-border);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zepra-action-card:hover {
+    background: rgba(0, 255, 136, 0.05);
+    border-color: var(--z-green);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.zepra-action-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 8px;
+}
+
+.zepra-action-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--z-green);
+}
+
+.zepra-action-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--z-accent);
+}
+
+.zepra-action-desc {
+    font-size: 11px;
+    color: var(--z-dim);
+    line-height: 1.4;
+}
+
+/* --- MESSAGES AREA --- */
+.zepra-messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 4px 20px 20px;
+    overflow-y: auto;
+    direction: ltr;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+.zepra-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.zepra-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.zepra-messages::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.zepra-messages:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.zepra-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- MESSAGE BUBBLE --- */
+.zepra-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 85%;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.zepra-msg.user {
+    align-self: flex-end;
+}
+
+.zepra-msg.ai {
+    align-self: flex-start;
+}
+
+.zepra-msg-role {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--z-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.zepra-msg-body {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.zepra-msg.user .zepra-msg-body {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
+}
+
+.zepra-msg.ai .zepra-msg-body {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--z-border);
+    color: var(--z-text);
+    padding: 16px 48px;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* --- AI MESSAGE FORMATTING --- */
+.zepra-msg.ai p {
+    margin: 0.8em 0;
+    line-height: 1.7;
+    color: #d4d4d8;
+}
+
+.zepra-msg.ai p:first-child {
+    margin-top: 0;
+}
+
+.zepra-msg.ai p:last-child {
+    margin-bottom: 0;
+}
+
+.zepra-msg.ai strong,
+.zepra-msg.ai b {
+    color: #fff;
+    font-weight: 600;
+}
+
+.zepra-msg.ai em,
+.zepra-msg.ai i {
+    color: #a1a1aa;
+    font-style: italic;
+}
+
+.zepra-msg.ai code {
+    background: #18181b;
+    color: #34d399;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    border: 1px solid #27272a;
+}
+
+.zepra-msg.ai ul,
+.zepra-msg.ai ol {
+    margin: 1em 0;
+    padding-left: 24px;
+    color: #d4d4d8;
+}
+
+.zepra-msg.ai li {
+    margin: 0.5em 0;
+    line-height: 1.6;
+}
+
+.zepra-msg.ai h1 {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #fff;
+    margin: 1.2em 0 0.6em;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #34d399;
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.zepra-msg.ai h1::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+
+.zepra-msg.ai h2 {
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #fff;
+    margin: 0.8em 0 0.4em;
+    padding-left: 10px;
+    border-left: 3px solid #10b981;
+    max-width: 100%;
+}
+
+.zepra-msg.ai h3 {
+    font-size: 1.05em;
+    font-weight: 500;
+    color: #d1fae5;
+    margin: 0.6em 0 0.3em;
+    background: rgba(16, 185, 129, 0.06);
+    padding: 5px 8px;
+    border-radius: 4px;
+    max-width: 100%;
+}
+
+.zepra-msg.ai .highlight {
+    background: rgba(234, 179, 8, 0.1);
+    color: #fde047;
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(234, 179, 8, 0.15);
+    box-shadow: none;
+}
+
+.zepra-table-wrapper {
+    overflow-x: auto;
+    margin: 1.5em 0;
+    border-radius: 8px;
+    border: 1px solid #27272a;
+    background: #09090b;
+}
+
+.zepra-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 300px;
+}
+
+.zepra-table thead {
+    background: #18181b;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.zepra-table th {
+    text-align: left;
+    padding: 10px 12px;
+    color: #34d399;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    padding: 10px 12px;
+    border-bottom: 2px solid #10b981;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.zepra-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #27272a;
+    color: #d4d4d8;
+    font-size: 12px;
+    word-break: break-word;
+    max-width: 280px;
+}
+
+.cell-empty {
+    color: #52525b;
+    font-style: italic;
+    opacity: 0.5;
+}
+
+.zepra-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.zepra-table tbody tr:hover {
+    background: rgba(16, 185, 129, 0.08);
+    transition: background 0.2s ease;
+}
+
+.zepra-code-wrapper {
+    background: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    margin: 1.5em 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.zepra-code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #18181b;
+    border-bottom: 1px solid #27272a;
+}
+
+.zepra-lang-tag {
+    font-size: 11px;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.zepra-copy-btn {
+    background: transparent;
+    border: 1px solid #27272a;
+    color: #d4d4d8;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zepra-copy-btn:hover {
+    background: #27272a;
+    color: #fff;
+    border-color: #3f3f46;
+}
+
+.zepra-copy-btn.copied {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: #059669;
+}
+
+.zepra-msg.ai pre {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 16px;
+    margin: 0;
+    box-shadow: none;
+    overflow-x: auto;
+}
+
+.zepra-msg.ai pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #e4e4e7;
+    font-size: 12px;
+    line-height: 1.6;
+    display: block;
+}
+
+/* --- INPUT AREA --- */
+.zepra-input-area {
+    padding: 16px 20px;
+    background: var(--z-glass);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--z-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.zepra-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.zepra-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--z-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--z-text);
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    max-height: 120px;
+    overflow-y: auto;
+    transition: all 0.2s;
+}
+
+.zepra-input:focus {
+    outline: none;
+    border-color: var(--z-green);
+    background: rgba(0, 255, 136, 0.03);
+    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+.zepra-input::placeholder {
+    color: var(--z-dim);
+}
+
+.zepra-input-actions {
+    display: flex;
+    gap: 4px;
+}
+
+button.zepra-send-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--z-green);
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-left: 4px;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+button.zepra-send-btn:hover {
+    background: #00cc6a;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+button.zepra-send-btn:disabled {
+    background: #27272a;
+    color: #52525b;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.zepra-disclaimer {
+    text-align: center;
+    font-size: 10px;
+    color: #52525b;
+}
+
+.zepra-typing {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.zepra-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--z-dim);
+    border-radius: 50%;
+    animation: zepraPulse 1.4s infinite ease-in-out;
+}
+
+.zepra-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.zepra-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes zepraPulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.zepra-resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    right: auto;
+    width: 30px;
+    height: 30px;
+    cursor: nwse-resize;
+    z-index: 9999;
+}
+
+.zepra-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid rgba(255, 255, 255, 0.8);
+    border-left: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 4px 0 0 0;
+    box-shadow: -2px -2px 8px rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    transition: all 0.2s;
+}
+
+.zepra-resize-handle:hover::before {
+    border-color: #34d399;
+    box-shadow: -2px -2px 12px rgba(52, 211, 153, 0.6);
+}
+
+/* ============================================
+   CIRCULAR LOADER (Premium)
+   ============================================ */
+.zepra-circular-loader {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border: 3px solid #282828;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: -5px -5px 5px rgba(255, 255, 255, 0.1),
+        10px 10px 10px rgba(0, 0, 0, 0.4),
+        inset -5px -5px 5px rgba(255, 255, 255, 0.2),
+        inset 10px 10px 10px rgba(0, 0, 0, 0.4);
+    margin: 20px auto;
+}
+
+.zepra-circular-loader:before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 10;
+    background: #212121;
+    border-radius: 50%;
+    border: 2px solid #292929;
+    box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.2),
+        inset 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+.zepra-circular-loader span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-image: linear-gradient(-225deg, #ff7402 0%, #ffe700 50%, #fff55e 100%);
+    filter: blur(15px);
+    z-index: -1;
+    animation: loaderRotate 0.5s linear infinite;
+}
+
+@keyframes loaderRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   SMART SUGGESTIONS
+   ============================================ */
+.zepra-suggestions {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 255, 136, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 136, 0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+.suggestions-label {
+    font-size: 12px;
+    color: #00ff88;
+    margin-bottom: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestions-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestion-chip {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    color: #e4e4e7;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.suggestion-chip:hover {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+}
+
+.suggestion-chip:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   SHINE TEXT EFFECT
+   ============================================ */
+.zepra-shine-text {
+    background: linear-gradient(to right, #9f9f9f 0, #fff 10%, #868686 20%);
+    background-position: 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 3s infinite linear;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ============================================
+   PREMIUM UI EFFECTS - Smart Suggestions
+   ============================================ */
+
+/* Shine Text Effect */
+.btn-shine {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    color: #fff;
+    background: linear-gradient(to right, #9f9f9f 0, #fff 10%, #868686 20%);
+    background-position: 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 3s infinite linear;
+    animation-fill-mode: forwards;
+    -webkit-text-size-adjust: none;
+    font-weight: 400;
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0;
+    }
+
+    60% {
+        background-position: 180px;
+    }
+
+    100% {
+        background-position: 180px;
+    }
+}
+
+/* Circular Loader */
+.zepra-loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.loader {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border: 3px solid #282828;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: -3px -3px 3px rgba(255, 255, 255, 0.1),
+        6px 6px 6px rgba(0, 0, 0, 0.4),
+        inset -3px -3px 3px rgba(255, 255, 255, 0.2),
+        inset 6px 6px 6px rgba(0, 0, 0, 0.4);
+}
+
+.loader:before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 10;
+    background: #212121;
+    border-radius: 50%;
+    border: 2px solid #292929;
+    box-shadow: inset -2px -2px 3px rgba(255, 255, 255, 0.2),
+        inset 2px 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.loader span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-image: linear-gradient(-225deg,
+            #00ff88 0%,
+            #00cc6a 50%,
+            #00ff88 100%);
+    filter: blur(15px);
+    z-index: -1;
+    animation: loaderRotate 0.5s linear infinite;
+}
+
+@keyframes loaderRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Smart Suggestions Container */
+.zepra-suggestions {
+    padding: 12px 20px;
+    background: rgba(0, 255, 136, 0.03);
+    border-top: 1px solid rgba(0, 255, 136, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zepra-suggestions-title {
+    font-size: 11px;
+    color: var(--z-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.zepra-suggestions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.suggestion-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    color: var(--z-text);
+}
+
+.suggestion-pill:hover {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: rgba(0, 255, 136, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+}
+
+.suggestion-pill svg {
+    width: 14px;
+    height: 14px;
+    color: var(--z-accent);
+}/ *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+       W E L C O M E   V I E W   &   A C T I O N   C A R D S  
+       = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * /  
+  
+ . z e p r a - w e l c o m e   {  
+         d i s p l a y :   f l e x ;  
+         f l e x - d i r e c t i o n :   c o l u m n ;  
+         a l i g n - i t e m s :   c e n t e r ;  
+         j u s t i f y - c o n t e n t :   c e n t e r ;  
+         p a d d i n g :   4 0 p x   2 0 p x ;  
+         g a p :   2 4 p x ;  
+         m i n - h e i g h t :   4 0 0 p x ;  
+ }  
+  
+ . z e p r a - v i d e o - h e a d e r   {  
+         d i s p l a y :   f l e x ;  
+         a l i g n - i t e m s :   c e n t e r ;  
+         j u s t i f y - c o n t e n t :   c e n t e r ;  
+ }  
+  
+ . z e p r a - m a s c o t - v i d e o   {  
+         w i d t h :   1 2 0 p x ;  
+         h e i g h t :   1 2 0 p x ;  
+         b o r d e r - r a d i u s :   5 0 % ;  
+         o b j e c t - f i t :   c o v e r ;  
+         b o x - s h a d o w :   0   8 p x   2 4 p x   r g b a ( 0 ,   2 5 5 ,   1 3 6 ,   0 . 3 ) ;  
+ }  
+  
+ . z e p r a - g r e e t i n g   {  
+         t e x t - a l i g n :   c e n t e r ;  
+         d i s p l a y :   f l e x ;  
+         f l e x - d i r e c t i o n :   c o l u m n ;  
+         g a p :   8 p x ;  
+ }  
+  
+ . z e p r a - g r e e t i n g   h 1   {  
+         f o n t - s i z e :   2 4 p x ;  
+         f o n t - w e i g h t :   7 0 0 ;  
+         c o l o r :   v a r ( - - z - t e x t ) ;  
+         m a r g i n :   0 ;  
+ }  
+  
+ . z e p r a - g r e e t i n g   p   {  
+         f o n t - s i z e :   1 4 p x ;  
+         c o l o r :   v a r ( - - z - d i m ) ;  
+         m a r g i n :   0 ;  
+ }  
+  
+ . z e p r a - a c t i o n s - g r i d   {  
+         d i s p l a y :   g r i d ;  
+         g r i d - t e m p l a t e - c o l u m n s :   r e p e a t ( 2 ,   1 f r ) ;  
+         g a p :   1 2 p x ;  
+         w i d t h :   1 0 0 % ;  
+         m a x - w i d t h :   4 0 0 p x ;  
+         p o s i t i o n :   r e l a t i v e ;  
+         z - i n d e x :   1 ;  
+ }  
+  
+ . z e p r a - a c t i o n - c a r d   {  
+         b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 3 ) ;  
+         b o r d e r :   1 p x   s o l i d   v a r ( - - z - b o r d e r ) ;  
+         b o r d e r - r a d i u s :   1 2 p x ;  
+         p a d d i n g :   1 6 p x ;  
+         c u r s o r :   p o i n t e r ;  
+         t r a n s i t i o n :   a l l   0 . 2 s   e a s e ;  
+         d i s p l a y :   f l e x ;  
+         f l e x - d i r e c t i o n :   c o l u m n ;  
+         g a p :   8 p x ;  
+         p o s i t i o n :   r e l a t i v e ;  
+         z - i n d e x :   2 ;  
+ }  
+  
+ . z e p r a - a c t i o n - c a r d : h o v e r   {  
+         b a c k g r o u n d :   r g b a ( 0 ,   2 5 5 ,   1 3 6 ,   0 . 0 8 ) ;  
+         b o r d e r - c o l o r :   r g b a ( 0 ,   2 5 5 ,   1 3 6 ,   0 . 3 ) ;  
+         t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;  
+         b o x - s h a d o w :   0   8 p x   2 4 p x   r g b a ( 0 ,   2 5 5 ,   1 3 6 ,   0 . 2 ) ;  
+ }  
+  
+ . a c t i o n - i c o n   {  
+         w i d t h :   3 2 p x ;  
+         h e i g h t :   3 2 p x ;  
+         d i s p l a y :   f l e x ;  
+         a l i g n - i t e m s :   c e n t e r ;  
+         j u s t i f y - c o n t e n t :   c e n t e r ;  
+         b a c k g r o u n d :   r g b a ( 0 ,   2 5 5 ,   1 3 6 ,   0 . 1 ) ;  
+         b o r d e r - r a d i u s :   8 p x ;  
+ }  
+  
+ . a c t i o n - i c o n   s v g   {  
+         w i d t h :   1 8 p x ;  
+         h e i g h t :   1 8 p x ;  
+         c o l o r :   v a r ( - - z - a c c e n t ) ;  
+ }  
+  
+ . a c t i o n - t i t l e   {  
+         f o n t - s i z e :   1 3 p x ;  
+         f o n t - w e i g h t :   6 0 0 ;  
+         c o l o r :   v a r ( - - z - t e x t ) ;  
+ }  
+  
+ . a c t i o n - d e s c   {  
+         f o n t - s i z e :   1 1 p x ;  
+         c o l o r :   v a r ( - - z - d i m ) ;  
+ }  
+ 

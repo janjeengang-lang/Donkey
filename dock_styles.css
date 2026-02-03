@@ -1,0 +1,106 @@
+/* Dock Station Styles */
+.dock-station {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.dock-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.dock-header h3 {
+    font-size: 20px;
+    background: linear-gradient(to right, #00ff88, #00cc6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.dock-header p {
+    color: #888;
+    font-size: 14px;
+}
+
+.dock-slots {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.dock-slot {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.dock-slot:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: #00ff88;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.1);
+}
+
+.dock-slot .slot-icon {
+    font-size: 24px;
+    margin-bottom: 6px;
+}
+
+.dock-slot .slot-name {
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.dock-slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transform: translateX(-100%);
+    transition: 0.5s;
+}
+
+.dock-slot:hover::before {
+    transform: translateX(100%);
+}
+
+.dock-slot.loading {
+    border-color: #ffd600;
+    cursor: wait;
+}
+
+.dock-slot.success {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+}
+
+.dock-slot.add-new {
+    border-style: dashed;
+    background: transparent;
+}

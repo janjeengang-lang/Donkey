@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zepra Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="marketplace.css">
+</head>
+
+<body>
+    <div class="market-container">
+        <!-- Sidebar Navigation -->
+        <aside class="market-sidebar">
+            <div class="logo-area">
+                <h1>ZEPRA</h1>
+                <span class="badge-beta">MARKET</span>
+            </div>
+
+            <nav class="categories-nav">
+                <h3>Discover</h3>
+                <ul id="categoryList">
+                    <li class="active" data-category="all">All Tools</li>
+                    <li data-category="AI Tools">Chat Bots</li>
+                    <li data-category="Development">Coding</li>
+                    <li data-category="Writing">Writing</li>
+                    <li data-category="Images">Image Gen</li>
+                    <li data-category="Productivity">Productivity</li>
+                </ul>
+
+                <h3>My Zepra</h3>
+                <ul class="personal-nav">
+                    <li data-category="favorites">⚡ My Favorites</li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="backToCommand" class="btn-text">« Command Center</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="market-main">
+            <!-- Header with Search -->
+            <header class="market-header">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search for AI tools, plugins, models...">
+                </div>
+                <div class="user-actions">
+                    <!-- Future user profile integration -->
+                    <div class="user-avatar">A1</div>
+                </div>
+            </header>
+
+            <!-- Tools Grid -->
+            <div class="content-scroll-area">
+                <div class="section-header">
+                    <h2 id="currentCategoryTitle">All Tools</h2>
+                    <span class="tool-count" id="toolCount">0 results</span>
+                </div>
+
+                <div class="tools-grid" id="toolsGrid">
+                    <!-- Cards injected by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Live Preview Modal -->
+    <div id="previewModal" class="modal hidden">
+        <div class="modal-content preview-card">
+            <button class="close-modal">&times;</button>
+            <div class="preview-media">
+                <img id="modalPreviewImg" src="" alt="Tool Preview">
+                <div class="modal-badges" id="modalBadges"></div>
+            </div>
+            <div class="preview-details">
+                <div class="preview-header">
+                    <img id="modalIcon" src="" alt="Icon" class="modal-icon">
+                    <div class="title-group">
+                        <h2 id="modalTitle">Tool Name</h2>
+                        <span id="modalCategory" class="category-tag">Category</span>
+                    </div>
+                </div>
+                <p id="modalDesc">Description goes here...</p>
+
+                <div class="preview-actions">
+                    <button id="modalLaunchBtn" class="btn-launch">Launch Tool 🚀</button>
+                    <button id="modalWorkflowBtn" class="btn-secondary">Add to Workflow</button>
+                    <button id="modalFavoriteBtn" class="btn-icon" title="Add to Favorites">🤍</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integration for "Add to Workflow" -->
+    <script src="tools_data.js"></script>
+    <script src="marketplace.js"></script>
+</body>
+
+</html>

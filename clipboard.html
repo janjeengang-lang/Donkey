@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zepra Clipboard Memory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="clipboard_v2.css" />
+</head>
+
+<body>
+  <div class="clipboard-app" data-state="loading">
+    <div class="app-container">
+      <header class="gpt-header">
+        <div class="header-logo">
+          <div class="logo-icon">📋</div>
+          <div class="header-titles">
+            <h1>Clipboard Memory</h1>
+            <p>Your secure snippet vault</p>
+          </div>
+        </div>
+        <div class="header-search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="M21 21l-4.35-4.35"></path>
+          </svg>
+          <input id="searchInput" type="search" placeholder="Search snippets, tags, or context..." autocomplete="off" />
+        </div>
+      </header>
+
+      <main class="cards-grid" id="clipboardList" aria-live="polite"></main>
+      <section class="empty-state" id="emptyListState">
+        <h2>No saved snippets yet</h2>
+        <p>Copy anything worth remembering. Zepra will analyze it instantly and store it here.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ChatGPT-style full-screen modal for details + assistant -->
+  <div class="detail-modal hidden" id="detailPanel">
+    <div class="detail-content" id="detailView">
+      <!-- Left: AI-enriched details -->
+      <section class="detail-panel">
+        <header class="detail-header">
+          <div>
+            <p class="detail-meta" id="detailMeta"></p>
+            <h2 class="detail-title" id="detailTitle"></h2>
+          </div>
+          <div class="detail-tags" id="detailTags"></div>
+        </header>
+
+        <section class="detail-placeholder" id="detailPlaceholder">
+          <h3>Select a snippet</h3>
+          <p>Your clipboard memory is enriched with AI insights and ready for action.</p>
+        </section>
+
+        <article class="detail-summary detail-section">
+          <h3 class="section-title">Executive Summary</h3>
+          <p class="section-content" id="detailSummary"></p>
+        </article>
+
+        <article class="detail-insight detail-section" id="detailInsight">
+          <h3 class="section-title">Actionable Insight</h3>
+          <p class="section-content" id="insightText"></p>
+        </article>
+
+        <article class="detail-source detail-section">
+          <h3 class="section-title">Original Clipboard</h3>
+          <div class="original-clipboard-shell">
+            <div class="source-actions">
+              <button class="btn-icon" id="btnCopySource" title="Copy original text">
+                <span>&#128203;</span>
+              </button>
+              <span id="sourceCharCount" class="meta-count"></span>
+            </div>
+            <pre class="original-clipboard source-code" id="sourceCode"><code></code></pre>
+          </div>
+        </article>
+      </section>
+      <div class="drag-divider" id="dragDivider" role="separator" aria-orientation="vertical"
+        aria-label="Resize panels"></div>
+      <!-- Right: Smart assistant chat -->
+      <section class="chat-panel assistant-panel" id="assistantPanel">
+        <header class="assistant-header">
+          <div>
+            <h3>Smart Assistant</h3>
+          </div>
+          <div class="assistant-actions">
+            <button class="dir-toggle-btn" id="toggleRTL" title="Toggle RTL/LTR">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 4H3"></path>
+                <path d="M21 12H3"></path>
+                <path d="M21 20H3"></path>
+                <path d="M17 4l-4 4 4 4"></path>
+              </svg>
+              RTL
+            </button>
+            <button class="style-blob-btn" type="button">
+              <div class="blob1"></div>
+              <div class="inner">Ask AI</div>
+            </button>
+          </div>
+        </header>
+
+        <div class="assistant-chat" id="assistantChat">
+          <div class="chat-messages chat-log" id="chatLog" aria-live="polite"></div>
+          <form id="chatForm" class="chat-input-area chat-form" autocomplete="off">
+            <textarea id="chatInput" placeholder="Ask a follow-up question about this clipboard snippet..." rows="2"
+              required></textarea>
+            <div class="chat-actions">
+              <button type="submit" class="btn btn-glow">Send</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <template id="clipListItemTemplate">
+    <button class="clip-card" data-id="">
+      <div class="clip-card-glow"></div>
+      <div class="clip-card-body">
+        <div class="clip-card-icon" data-type=""></div>
+        <div class="clip-card-content">
+          <h3></h3>
+          <p class="clip-snippet"></p>
+          <div class="clip-meta-line">
+            <span class="clip-category"></span>
+            <span class="clip-timestamp"></span>
+          </div>
+        </div>
+      </div>
+    </button>
+  </template>
+
+  <template id="chatMessageTemplate">
+    <div class="chat-message" data-role="">
+      <div class="chat-avatar"></div>
+      <div class="chat-bubble">
+        <div class="chat-md"></div>
+        <span class="chat-time"></span>
+      </div>
+    </div>
+  </template>
+
+  <script src="clipboard.js" type="module"></script>
+</body>
+
+</html>

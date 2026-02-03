@@ -1,0 +1,279 @@
+/* --- ZEPRA NATIVE MARKDOWN THEME (GREEN OPS) --- */
+
+.markdown-body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #e4e4e7;
+    /* Zinc 200 */
+    direction: inherit;
+    /* Matches parent (RTL/LTR) */
+}
+
+/* Headings */
+.markdown-body h1 {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #fff;
+    margin: 1.5em 0 0.8em;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #10b981;
+    /* Zepra Green */
+    position: relative;
+}
+
+.markdown-body h1::after {
+    /* Glowing underscore effect */
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    /* Small accent */
+    height: 2px;
+    background: #34d399;
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
+}
+
+.markdown-body h2 {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #fff;
+    margin: 1.4em 0 0.6em;
+    padding-left: 12px;
+    border-left: 4px solid #10b981;
+}
+
+.markdown-body h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #d1fae5;
+    /* Light Green Tint */
+    margin: 1.2em 0 0.5em;
+    background: rgba(16, 185, 129, 0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* Typography Text */
+.markdown-body strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+.markdown-body em {
+    color: #a1a1aa;
+    font-style: italic;
+}
+
+.markdown-body a {
+    color: #34d399;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(52, 211, 153, 0.5);
+    transition: all 0.2s;
+}
+
+.markdown-body a:hover {
+    color: #6ee7b7;
+    border-bottom-style: solid;
+}
+
+/* Lists */
+.markdown-body ul,
+.markdown-body ol {
+    padding-inline-start: 24px;
+    margin: 1em 0;
+}
+
+.markdown-body li {
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.markdown-body ul li::marker {
+    color: #10b981;
+}
+
+/* Blockquotes (The Insight Box) */
+.markdown-body blockquote {
+    margin: 1.5em 0;
+    padding: 16px 20px;
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+    border-left: 3px solid #10b981;
+    border-radius: 0 8px 8px 0;
+    color: #d4d4d8;
+    position: relative;
+}
+
+.rtl-mode .markdown-body blockquote {
+    border-left: none;
+    border-right: 3px solid #10b981;
+    border-radius: 8px 0 0 8px;
+    background: linear-gradient(to left, rgba(16, 185, 129, 0.05), transparent);
+}
+
+/* Code Blocks (Terminal Style) */
+.markdown-body pre {
+    background: #09090b;
+    /* Deep Black */
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 40px 20px 20px;
+    /* Space for header */
+    margin: 1.5em 0;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Mac-style Buttons */
+.markdown-body pre::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    /* LTR default */
+    display: flex;
+    gap: 6px;
+    width: 42px;
+    height: 10px;
+    background-image:
+        radial-gradient(circle, #ef4444 4px, transparent 5px),
+        radial-gradient(circle, #eab308 4px, transparent 5px),
+        radial-gradient(circle, #22c55e 4px, transparent 5px);
+    background-size: 10px 10px;
+    background-position: 0 0, 16px 0, 32px 0;
+    background-repeat: no-repeat;
+}
+
+.rtl-mode .markdown-body pre::after {
+    right: auto;
+    left: 15px;
+}
+
+.markdown-body code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: #e4e4e7;
+}
+
+.markdown-body :not(pre)>code {
+    /* Inline Code */
+    background: rgba(255, 255, 255, 0.1);
+    color: #6ee7b7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border: 1px solid rgba(110, 231, 183, 0.1);
+}
+
+/* Tables (Zepra Matrix) */
+.table-wrapper {
+    overflow-x: auto;
+    margin: 1.5em 0;
+    border-radius: 12px;
+    border: 1px solid #27272a;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #18181b;
+    font-size: 14px;
+}
+
+.markdown-body th {
+    background: #27272a;
+    color: #34d399;
+    /* Green Text */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid #3f3f46;
+}
+
+.rtl-mode .markdown-body th {
+    text-align: right;
+}
+
+.markdown-body td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #27272a;
+    color: #d4d4d8;
+}
+
+.markdown-body tr:last-child td {
+    border-bottom: none;
+}
+
+.markdown-body tr:hover td {
+    background: rgba(52, 211, 153, 0.05);
+}
+
+/* --- SPECIAL EFFECTS (AI Controlled) --- */
+
+/* Highlight */
+.markdown-body .highlight {
+    background: rgba(234, 179, 8, 0.15);
+    /* Yellow Tint */
+    color: #fde047;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.1);
+}
+
+/* Transparent / Subtle */
+.markdown-body .transparent {
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+/* Alerts */
+.markdown-body .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 1em 0;
+    border-left: 4px solid;
+    background: #18181b;
+}
+
+.markdown-body .alert-info {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+}
+
+.markdown-body .alert-warning {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    color: #fcd34d;
+}
+
+/* Interactive Button */
+.markdown-body .md-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.markdown-body .md-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}

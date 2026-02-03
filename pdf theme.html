@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Conversation Export</title>
+    <!-- خطوط برمجية وعصرية -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* ChatGPT Dark Theme Palette */
+            --bg-page: #343541;
+            /* خلفية الصفحة */
+            --bg-ai: #444654;
+            /* خلفية رد الذكاء */
+            --bg-user: #10a37f;
+            /* خلفية رد المستخدم */
+            --text-main: #ececf1;
+            /* نص أبيض فاتح */
+            --text-muted: #c5c5d2;
+            /* نص رمادي */
+            --border: #565869;
+            /* حدود */
+            --code-bg: #202123;
+            /* خلفية الكود */
+            --system-bg: #2a2b32;
+            /* خلفية السيستم */
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #202123;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 8.5pt;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* --- Page Layout --- */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            background: var(--bg-page);
+            margin: 20px auto;
+            /* زيادة الهامش السفلي بشكل كبير لحماية الفوتر */
+            padding: 15mm 15mm 30mm 15mm;
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        @media print {
+            body {
+                background: var(--bg-page);
+            }
+
+            .page {
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* --- Header & Footer --- */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            height: 40px;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 10pt;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7pt;
+            color: #8e8ea0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            /* مكان الفوتر */
+            left: 15mm;
+            right: 15mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 7pt;
+            color: #8e8ea0;
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+            /* خلفية صلبة وطبقة عليا لمنع التداخل البصري */
+            background: var(--bg-page);
+            z-index: 500;
+            height: 30px;
+        }
+
+        /* --- Components --- */
+        .system-card {
+            background: var(--system-bg);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 8pt;
+            color: var(--text-muted);
+        }
+
+        .system-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 7pt;
+            color: #eab308;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .msg-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .msg-row.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .avatar.ai {
+            background: #19c37d;
+            color: white;
+        }
+
+        .avatar.user {
+            background: #5436da;
+            color: white;
+        }
+
+        .msg-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 8.5pt;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .msg-row.ai .msg-bubble {
+            background: var(--bg-ai);
+            color: var(--text-main);
+            border-top-left-radius: 2px;
+        }
+
+        .msg-row.user .msg-bubble {
+            background: var(--bg-user);
+            color: white;
+            border-top-right-radius: 2px;
+        }
+
+        .msg-bubble h3 {
+            font-size: 10pt;
+            margin: 10px 0 6px 0;
+            font-weight: 600;
+            color: white;
+        }
+
+        .msg-bubble p {
+            margin-bottom: 8px;
+        }
+
+        .msg-bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        .msg-bubble ul {
+            margin-bottom: 8px;
+            padding-left: 20px;
+        }
+
+        .code-container {
+            background: black;
+            border-radius: 6px;
+            margin: 8px 0;
+            border: 1px solid #3e3f4b;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #343541;
+            padding: 4px 10px;
+            font-size: 7pt;
+            color: #b3b3b3;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #3e3f4b;
+        }
+
+        .code-body {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8pt;
+            padding: 10px;
+            color: #e0e0e0;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        .k {
+            color: #ff7b72;
+        }
+
+        .s {
+            color: #a5d6ff;
+        }
+
+        .f {
+            color: #d2a8ff;
+        }
+
+        .c {
+            color: #8b949e;
+        }
+
+        .md-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 8pt;
+        }
+
+        .md-table th {
+            background: #343541;
+            text-align: left;
+            padding: 6px;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .md-table td {
+            padding: 6px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .user-image {
+            max-width: 200px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .seamless-top .msg-bubble {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            padding-bottom: 15px;
+            position: relative;
+        }
+
+        .seamless-top .msg-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, var(--bg-ai));
+        }
+
+        .seamless-bottom .msg-bubble {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            padding-top: 10px;
+        }
+
+        .seamless-bottom .avatar {
+            visibility: hidden;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #10a37f;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="print-btn no-print" onclick="window.print()">Export PDF <i class="fas fa-file-export"></i></button>
+    <div id="content-container"></div>
+
+    <script>
+        const content = [
+            // --- System Prompt ---
+            {
+                type: 'system',
+                body: `
+                    <div class="system-card">
+                        <div class="system-label"><i class="fas fa-terminal"></i> System Prompt</div>
+                        You are an expert Senior Full-Stack Developer AI. You provide clean, efficient, and well-documented code. You answer with technical depth but keep explanations concise. You love using tables for comparisons.
+                    </div>
+                `
+            },
+            // --- User 1 ---
+            {
+                type: 'user',
+                body: `
+                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" class="user-image">
+                    <div>I'm trying to parse this code. How do I center a div using modern CSS? Also, explain the difference between Grid and Flexbox.</div>
+                `
+            },
+            // --- AI 1 ---
+            {
+                type: 'ai',
+                body: `
+                    <p>Centering a div is straightforward in modern CSS. The most robust method is using <strong>Flexbox</strong> or <strong>CSS Grid</strong>.</p>
+                    
+                    <h3>Method 1: Flexbox</h3>
+                    <div class="code-container">
+                        <div class="code-header"><span>css</span><span>Copy code</span></div>
+                        <div class="code-body">.parent {
+  <span class="k">display</span>: flex;
+  <span class="k">justify-content</span>: center; <span class="c">/* Horizontal */</span>
+  <span class="k">align-items</span>: center;     <span class="c">/* Vertical */</span>
+  <span class="k">height</span>: 100vh;
+}</div>
+                    </div>
+
+                    <h3>Method 2: Grid (The "Super Center")</h3>
+                    <div class="code-container">
+                        <div class="code-header"><span>css</span><span>Copy code</span></div>
+                        <div class="code-body">.parent {
+  <span class="k">display</span>: grid;
+  <span class="k">place-items</span>: center;
+}</div>
+                    </div>
+
+                    <p>Here is a quick comparison table between the two layout systems:</p>
+                    <table class="md-table">
+                        <thead>
+                            <tr><th>Feature</th><th>Flexbox</th><th>CSS Grid</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Dimensionality</td><td>One-dimensional (Row OR Column)</td><td>Two-dimensional (Rows AND Columns)</td></tr>
+                            <tr><td>Use Case</td><td>Components, Navbars, Alignments</td><td>Page Layouts, Complex Grids</td></tr>
+                            <tr><td>Overlap</td><td>Harder to achieve</td><td>Native support (layering)</td></tr>
+                        </tbody>
+                    </table>
+                `
+            },
+            // --- User 2 ---
+            {
+                type: 'user',
+                body: `Great! Now can you write a Python script that scans a directory for JSON files and merges them into a single CSV?`
+            },
+            // --- AI 2 (Long) ---
+            {
+                type: 'ai',
+                body: `
+                    <p>Certainly. We will use the built-in <code>os</code> module to traverse directories and <code>pandas</code> for efficient data handling and CSV export. This script assumes the JSON files have a similar structure.</p>
+
+                    <div class="code-container">
+                        <div class="code-header"><span>python</span><span>Copy code</span></div>
+                        <div class="code-body"><span class="k">import</span> os
+<span class="k">import</span> pandas <span class="k">as</span> pd
+<span class="k">import</span> json
+
+<span class="f">def</span> merge_json_to_csv(directory_path, output_file):
+    all_data = []
+    
+    <span class="c"># Walk through the directory</span>
+    <span class="k">for</span> root, dirs, files <span class="k">in</span> os.walk(directory_path):
+        <span class="k">for</span> file <span class="k">in</span> files:
+            <span class="k">if</span> file.endswith(<span class="s">".json"</span>):
+                full_path = os.path.join(root, file)
+                
+                <span class="k">try</span>:
+                    <span class="k">with</span> open(full_path, <span class="s">'r'</span>) <span class="k">as</span> f:
+                        data = json.load(f)
+                        <span class="c"># Handle if json is list or dict</span>
+                        <span class="k">if</span> isinstance(data, list):
+                            all_data.extend(data)
+                        <span class="k">else</span>:
+                            all_data.append(data)
+                <span class="k">except</span> Exception <span class="k">as</span> e:
+                    print(f<span class="s">"Error reading {file}: {e}"</span>)
+
+    <span class="c"># Convert to DataFrame</span>
+    df = pd.DataFrame(all_data)
+    
+    <span class="c"># Save to CSV</span>
+    df.to_csv(output_file, index=False)
+    print(f<span class="s">"Successfully saved {len(df)} records to {output_file}"</span>)
+
+<span class="c"># Usage</span>
+merge_json_to_csv(<span class="s">'./data_folder'</span>, <span class="s">'merged_output.csv'</span>)</div>
+                    </div>
+                    
+                    <p><strong>Key features of this script:</strong></p>
+                    <ul>
+                        <li><strong>Recursive Search:</strong> Uses <code>os.walk</code> to find files in subdirectories too.</li>
+                        <li><strong>Error Handling:</strong> Skips corrupt files without crashing.</li>
+                        <li><strong>Flexibility:</strong> Handles both List-of-Objects and Single-Object JSON files.</li>
+                    </ul>
+                `
+            },
+            // --- User 3 ---
+            {
+                type: 'user',
+                body: `What if I don't want to use Pandas? I want to keep it lightweight.`
+            },
+            // --- AI 3 ---
+            {
+                type: 'ai',
+                body: `
+                    <p>That's a valid concern. Pandas is heavy. You can use the built-in <code>csv</code> module. Here is the refactored version:</p>
+                    
+                    <div class="code-container">
+                        <div class="code-header"><span>python</span><span>Copy code</span></div>
+                        <div class="code-body"><span class="k">import</span> os
+<span class="k">import</span> json
+<span class="k">import</span> csv
+
+<span class="f">def</span> merge_lightweight(directory, output_csv):
+    headers = set()
+    data_list = []
+
+    <span class="c"># 1. First pass: Collect data and identify all unique keys (headers)</span>
+    <span class="k">for</span> filename <span class="k">in</span> os.listdir(directory):
+        <span class="k">if</span> filename.endswith(<span class="s">'.json'</span>):
+            <span class="k">with</span> open(os.path.join(directory, filename)) <span class="k">as</span> f:
+                entry = json.load(f)
+                data_list.append(entry)
+                headers.update(entry.keys())
+
+    <span class="c"># 2. Second pass: Write to CSV</span>
+    <span class="k">with</span> open(output_csv, <span class="s">'w'</span>, newline=<span class="s">''</span>) <span class="k">as</span> f:
+        writer = csv.DictWriter(f, fieldnames=list(headers))
+        writer.writeheader()
+        writer.writerows(data_list)</div>
+                    </div>
+                `
+            },
+            // --- User 4 ---
+            {
+                type: 'user',
+                body: `Can you explain the concept of Recursion to a 5-year-old?`
+            },
+            // --- AI 4 ---
+            {
+                type: 'ai',
+                body: `
+                    <p>Imagine you have a big box of toys 🎁, and you want to find your favorite red ball. But inside that big box, there are smaller boxes.</p>
+                    <p><strong>Recursion</strong> is like doing this:</p>
+                    <ol>
+                        <li>You open the big box.</li>
+                        <li>If you see the ball, great! You grab it. (This is called the <strong>Base Case</strong>).</li>
+                        <li>If you see another box instead, you use the <em>exact same instructions</em> to open that smaller box.</li>
+                        <li>You keep doing this—opening boxes inside boxes—until you finally find the ball.</li>
+                    </ol>
+                    <p>So, recursion is just a fancy way of saying: <em>"To solve a big problem, I'll do the same small step over and over again until I'm done."</em></p>
+                    <p>In coding, it's when a function calls itself! 📞</p>
+                `
+            },
+            // --- User 5 ---
+            {
+                type: 'user',
+                body: `Thanks! Generate a markdown list of fruits for me.`
+            },
+            // --- AI 5 ---
+            {
+                type: 'ai',
+                body: `
+                    Sure! Here is a healthy list:
+                    <ul>
+                        <li>🍎 Apple</li>
+                        <li>🍌 Banana</li>
+                        <li>🍓 Strawberry</li>
+                        <li>🍇 Grapes</li>
+                        <li>🥭 Mango</li>
+                    </ul>
+                `
+            }
+        ];
+
+        // ==========================================
+        // THE ENGINE (Radical Fix Edition)
+        // ==========================================
+        const CONTAINER = document.getElementById('content-container');
+
+        // ⭐ THE RADICAL FIX ⭐
+        // خفضنا الارتفاع من 860 إلى 820 بكسل
+        // هذا سيجبر الصفحة على الانقسام مبكراً جداً
+        const MAX_HEIGHT = 820;
+
+        let pageCounter = 0;
+
+        function createPage() {
+            pageCounter++;
+            const p = document.createElement('div');
+            p.className = 'page';
+            p.innerHTML = `
+                <div class="page-header">
+                    <div class="header-brand">
+                        <i class="fas fa-robot"></i> ChatGPT Export
+                    </div>
+                    <div class="header-meta">
+                        Model: GPT-4 • Dark Mode
+                    </div>
+                </div>
+                <div class="content-wrapper"></div>
+                <div class="page-footer">
+                    <span>Generated by AI Exporter</span>
+                    <span>${new Date().toLocaleDateString()}</span>
+                    <span>Page ${pageCounter}</span>
+                </div>`;
+            return p;
+        }
+
+        function createMessageElement(item) {
+            if (item.type === 'system') return document.createRange().createContextualFragment(item.body).firstElementChild;
+
+            const row = document.createElement('div');
+            row.className = `msg-row ${item.type}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${item.type}`;
+            avatar.innerHTML = item.type === 'ai' ? '<i class="fas fa-bolt"></i>' : '<i class="fas fa-user"></i>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = item.body;
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            return row;
+        }
+
+        function render() {
+            let currentPage = createPage();
+            CONTAINER.appendChild(currentPage);
+
+            content.forEach(item => {
+                let wrapper = currentPage.querySelector('.content-wrapper');
+                let block = createMessageElement(item);
+                wrapper.appendChild(block);
+
+                if (wrapper.scrollHeight > MAX_HEIGHT) {
+                    wrapper.removeChild(block);
+
+                    if (item.type === 'system') {
+                        currentPage = createPage();
+                        CONTAINER.appendChild(currentPage);
+                        currentPage.querySelector('.content-wrapper').appendChild(block);
+                        return;
+                    }
+
+                    let partA = block.cloneNode(true);
+                    partA.classList.add('seamless-top');
+                    wrapper.appendChild(partA);
+
+                    let partABubble = partA.querySelector('.msg-bubble');
+                    let childrenToMove = [];
+
+                    while (wrapper.scrollHeight > MAX_HEIGHT && partABubble.lastChild) {
+                        childrenToMove.unshift(partABubble.lastChild);
+                        partABubble.removeChild(partABubble.lastChild);
+                    }
+
+                    currentPage = createPage();
+                    CONTAINER.appendChild(currentPage);
+                    wrapper = currentPage.querySelector('.content-wrapper');
+
+                    let partB = document.createElement('div');
+                    partB.className = `msg-row ${item.type} seamless-bottom`;
+
+                    let avatarB = document.createElement('div');
+                    avatarB.className = `avatar ${item.type}`;
+                    avatarB.innerHTML = item.type === 'ai' ? '<i class="fas fa-bolt"></i>' : '<i class="fas fa-user"></i>';
+
+                    let bubbleB = document.createElement('div');
+                    bubbleB.className = 'msg-bubble';
+
+                    childrenToMove.forEach(c => bubbleB.appendChild(c));
+
+                    partB.appendChild(avatarB);
+                    partB.appendChild(bubbleB);
+                    wrapper.appendChild(partB);
+
+                    if (partABubble.innerHTML.trim() === '') {
+                        let prevWrapper = CONTAINER.querySelectorAll('.page')[pageCounter - 2].querySelector('.content-wrapper');
+                        prevWrapper.removeChild(partA);
+                        wrapper.innerHTML = '';
+                        let freshBlock = createMessageElement(item);
+                        wrapper.appendChild(freshBlock);
+                    }
+                }
+            });
+        }
+
+        window.onload = render;
+    </script>
+</body>
+
+</html>

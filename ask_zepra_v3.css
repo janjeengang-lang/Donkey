@@ -1,0 +1,795 @@
+/* =========================================
+   ZEPRA V3.0 - JSON SYSTEM STYLES
+   ========================================= */
+
+/* Base Variables */
+:host {
+    --z-primary: #10b981;
+    --z-primary-dark: #059669;
+    --z-bg: #0f172a;
+    --z-bg-light: #1e293b;
+    --z-text: #e2e8f0;
+    --z-text-dim: #94a3b8;
+    --z-border: #334155;
+    --z-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================
+   JSON CONTENT BLOCKS
+   ========================================= */
+
+/* Headings */
+.zepra-heading {
+    color: #fff;
+    font-weight: 600;
+    margin: 0.8em 0 0.5em;
+    line-height: 1.3;
+}
+
+h1.zepra-heading {
+    font-size: 1.25em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--z-primary);
+    position: relative;
+}
+
+h1.zepra-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+
+h2.zepra-heading {
+    font-size: 1.15em;
+    padding-left: 10px;
+    border-left: 3px solid var(--z-primary);
+}
+
+h3.zepra-heading {
+    font-size: 1.05em;
+    font-weight: 500;
+    color: #d1fae5;
+    background: rgba(16, 185, 129, 0.06);
+    padding: 5px 8px;
+    border-radius: 4px;
+}
+
+/* Paragraphs */
+.zepra-paragraph {
+    margin: 0.6em 0;
+    line-height: 1.6;
+    color: var(--z-text);
+    font-size: 13px;
+}
+
+/* Lists */
+.zepra-list {
+    margin: 0.8em 0;
+    padding-left: 20px;
+    list-style-position: outside;
+}
+
+.zepra-list li {
+    margin: 0.4em 0;
+    line-height: 1.6;
+    font-size: 13px;
+    color: var(--z-text);
+}
+
+.zepra-list li::marker {
+    color: var(--z-primary);
+}
+
+ol.zepra-list li::marker {
+    font-weight: 600;
+}
+
+/* Task List */
+.zepra-task-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.8em 0;
+}
+
+.zepra-task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0.4em 0;
+    font-size: 13px;
+}
+
+.zepra-task-item input[type="checkbox"] {
+    margin-top: 3px;
+    cursor: not-allowed;
+}
+
+/* Tables */
+.zepra-table-wrapper {
+    overflow-x: auto;
+    margin: 1.2em 0;
+    border-radius: 6px;
+    border: 1px solid var(--z-border);
+    box-shadow: 0 2px 6px var(--z-shadow);
+}
+
+.zepra-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #18181b;
+    table-layout: auto;
+}
+
+.zepra-table[dir="rtl"] th,
+.zepra-table[dir="rtl"] td {
+    text-align: right;
+}
+
+.zepra-table[dir="ltr"] th,
+.zepra-table[dir="ltr"] td {
+    text-align: left;
+}
+
+.zepra-table th {
+    background: linear-gradient(180deg, #252529 0%, #202023 100%);
+    color: #34d399;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--z-primary);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.zepra-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--z-border);
+    color: var(--z-text);
+    font-size: 12px;
+    word-break: break-word;
+    max-width: 280px;
+}
+
+.zepra-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.zepra-table tbody tr:hover {
+    background: rgba(16, 185, 129, 0.08);
+    transition: background 0.2s ease;
+}
+
+.cell-empty {
+    color: #52525b;
+    font-style: italic;
+    opacity: 0.5;
+}
+
+/* Code Blocks */
+.zepra-code-wrapper {
+    margin: 1em 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--z-border);
+    background: #0f172a;
+}
+
+.zepra-code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #1e293b;
+    border-bottom: 1px solid var(--z-border);
+}
+
+.zepra-lang-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--z-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.zepra-copy-btn {
+    background: transparent;
+    border: 1px solid var(--z-border);
+    color: var(--z-text-dim);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zepra-copy-btn:hover {
+    background: var(--z-primary);
+    color: #fff;
+    border-color: var(--z-primary);
+}
+
+.zepra-code-wrapper pre {
+    margin: 0;
+    padding: 12px;
+    overflow-x: auto;
+    background: #0f172a;
+}
+
+.zepra-code-wrapper code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #e2e8f0;
+}
+
+/* Inline Code */
+.zepra-inline-code {
+    background: rgba(16, 185, 129, 0.1);
+    color: #fbbf24;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Alerts */
+.zepra-alert {
+    padding: 12px 14px;
+    margin: 1em 0;
+    border-radius: 6px;
+    border-left: 4px solid;
+    font-size: 13px;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.zepra-alert-info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+    border-left-color: #3b82f6;
+    color: #93c5fd;
+}
+
+.zepra-alert-warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.05));
+    border-left-color: #fbbf24;
+    color: #fde68a;
+}
+
+.zepra-alert-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border-left-color: var(--z-primary);
+    color: #6ee7b7;
+}
+
+.zepra-alert-error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    border-left-color: #ef4444;
+    color: #fca5a5;
+}
+
+/* Quote */
+.zepra-quote {
+    border-right: 3px solid var(--z-primary);
+    border-left: 3px solid var(--z-primary);
+    padding: 10px 14px;
+    margin: 0.8em 0;
+    background: linear-gradient(to left, rgba(16, 185, 129, 0.06), transparent);
+    color: var(--z-text);
+    font-style: italic;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+/* Divider */
+.zepra-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--z-border), transparent);
+    margin: 1.5em 0;
+}
+
+/* Inline Formatting */
+strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+em {
+    color: #cbd5e1;
+    font-style: italic;
+}
+
+.zepra-highlight {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+del {
+    color: #64748b;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+u {
+    text-decoration: underline;
+    text-decoration-color: var(--z-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+/* Error Display */
+.zepra-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 1em 0;
+}
+
+.zepra-error h3 {
+    color: #fca5a5;
+    margin: 0 0 0.5em;
+    font-size: 1.1em;
+}
+
+.zepra-error p {
+    color: #fecaca;
+    margin: 0.5em 0;
+}
+
+.zepra-error details {
+    margin-top: 1em;
+}
+
+.zepra-error summary {
+    color: #fca5a5;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 4px;
+}
+
+.zepra-error pre {
+    background: #1e293b;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-top: 0.5em;
+    font-size: 11px;
+    color: #fca5a5;
+}
+
+/* =========================================
+   MESSAGE CONTAINER STYLES
+   ========================================= */
+
+.zepra-msg.ai .zepra-msg-body {
+    padding: 16px 32px;
+    box-sizing: border-box;
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--z-text);
+}
+
+/* =========================================
+   EXISTING ZEPRA STYLES (KEEP THESE)
+   ========================================= */
+
+/* Trigger Button */
+.zepra-trigger {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--z-primary), var(--z-primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--z-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999999;
+}
+
+.zepra-trigger:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.zepra-trigger svg {
+    width: 28px;
+    height: 28px;
+    color: #fff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Modal */
+.zepra-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 600px;
+    height: 650px;
+    background: var(--z-bg);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000000;
+    border: 1px solid var(--z-border);
+}
+
+.zepra-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Header */
+.zepra-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--z-bg-light);
+    border-bottom: 1px solid var(--z-border);
+    border-radius: 12px 12px 0 0;
+}
+
+.zepra-brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.zepra-brand-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--z-primary), var(--z-primary-dark));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zepra-brand-icon svg {
+    width: 20px;
+    height: 20px;
+    color: #fff;
+}
+
+.zepra-brand-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.zepra-brand-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zepra-badge {
+    background: var(--z-primary);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.zepra-brand-subtitle {
+    font-size: 11px;
+    color: var(--z-text-dim);
+}
+
+.zepra-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.zepra-icon-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--z-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zepra-icon-btn:hover {
+    background: var(--z-bg);
+    border-color: var(--z-primary);
+}
+
+.zepra-icon-btn svg {
+    width: 16px;
+    height: 16px;
+    color: var(--z-text-dim);
+}
+
+/* Content */
+.zepra-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--z-bg);
+}
+
+.zepra-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.zepra-msg {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.zepra-msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--z-bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+.zepra-msg.ai .zepra-msg-avatar {
+    background: linear-gradient(135deg, var(--z-primary), var(--z-primary-dark));
+}
+
+.zepra-msg.ai .zepra-msg-avatar svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+.zepra-msg-body {
+    flex: 1;
+    background: var(--z-bg-light);
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--z-text);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.zepra-msg.user .zepra-msg-body {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Welcome */
+.zepra-welcome {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.zepra-welcome-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--z-primary), var(--z-primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zepra-welcome-icon svg {
+    width: 32px;
+    height: 32px;
+    color: #fff;
+}
+
+.zepra-welcome h2 {
+    color: #fff;
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.zepra-welcome p {
+    color: var(--z-text-dim);
+    margin: 0 0 24px;
+}
+
+.zepra-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.zepra-suggestion {
+    background: var(--z-bg-light);
+    border: 1px solid var(--z-border);
+    color: var(--z-text);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zepra-suggestion:hover {
+    background: var(--z-primary);
+    border-color: var(--z-primary);
+    color: #fff;
+}
+
+/* Footer */
+.zepra-footer {
+    padding: 16px;
+    background: var(--z-bg-light);
+    border-top: 1px solid var(--z-border);
+    border-radius: 0 0 12px 12px;
+}
+
+.zepra-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.zepra-input {
+    flex: 1;
+    background: var(--z-bg);
+    border: 1px solid var(--z-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--z-text);
+    font-size: 14px;
+    resize: none;
+    font-family: inherit;
+    max-height: 120px;
+    transition: border-color 0.2s;
+}
+
+.zepra-input:focus {
+    outline: none;
+    border-color: var(--z-primary);
+}
+
+.zepra-send-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--z-primary);
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.zepra-send-btn:hover {
+    background: var(--z-primary-dark);
+    transform: scale(1.05);
+}
+
+.zepra-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.zepra-send-btn svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+.zepra-context-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--z-text-dim);
+}
+
+.zepra-context-info svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Loader */
+.zepra-loader {
+    display: flex;
+    gap: 6px;
+    padding: 8px 0;
+}
+
+.zepra-loader span {
+    width: 8px;
+    height: 8px;
+    background: var(--z-primary);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.zepra-loader span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.zepra-loader span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Resize Handle */
+.zepra-resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    z-index: 10;
+}
+
+/* Scrollbar */
+.zepra-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.zepra-content::-webkit-scrollbar-track {
+    background: var(--z-bg);
+}
+
+.zepra-content::-webkit-scrollbar-thumb {
+    background: var(--z-border);
+    border-radius: 4px;
+}
+
+.zepra-content::-webkit-scrollbar-thumb:hover {
+    background: var(--z-primary);
+}

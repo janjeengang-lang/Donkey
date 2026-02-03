@@ -1,0 +1,388 @@
+:root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --primary: #fbbf24;
+    /* Yellow folder color */
+    --primary-hover: #f59e0b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 40px;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(251, 191, 36, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 60px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.main-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.main-header p {
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #1e293b;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px;
+    padding: 20px 0;
+}
+
+/* --- THE FOLDER COMPONENT (Based on User Code) --- */
+.folder-wrapper {
+    position: relative;
+    display: inline-block;
+    /* Make it occupy grid space properly */
+    width: 100%;
+    height: 60px;
+    /* Base height */
+    z-index: 1;
+}
+
+.folder-wrapper:hover {
+    z-index: 100;
+    /* Bring to front on hover */
+}
+
+/* The visible "Folder" Card */
+.folder-trigger {
+    background: white;
+    /* As requested */
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    transition: transform 0.3s ease-out;
+    width: 100%;
+    position: relative;
+    z-index: 20;
+}
+
+.folder-wrapper:hover .folder-trigger {
+    transform: translateY(-4px);
+}
+
+.folder-icon {
+    transition: color 0.2s;
+    color: #fbbf24;
+}
+
+.folder-wrapper:hover .folder-icon {
+    color: #d97706;
+}
+
+.folder-label {
+    font-weight: 500;
+    color: #374151;
+    /* Gray-700 */
+    transition: color 0.2s;
+}
+
+.folder-wrapper:hover .folder-label {
+    color: #d97706;
+}
+
+/* The Dropdown Menu (The "Inside" of the folder) */
+.folder-dropdown {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    /* Below the trigger */
+    margin-top: 8px;
+    width: 100%;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* Animation States */
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+    transition: all 0.3s ease-out;
+    z-index: 10;
+}
+
+.folder-wrapper:hover .folder-dropdown {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+}
+
+.site-list {
+    padding: 16px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.site-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    /* Gray-600 */
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.1s;
+}
+
+.site-item:hover {
+    background: #f3f4f6;
+}
+
+.site-favicon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+/* Action Buttons inside dropdown */
+.folder-actions {
+    border-top: 1px solid #e5e7eb;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    background: #f9fafb;
+    border-radius: 0 0 8px 8px;
+}
+
+.launch-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+    margin-right: 8px;
+    transition: background 0.2s;
+}
+
+.launch-btn:hover {
+    background: #059669;
+}
+
+.delete-btn {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    /* Flex to center */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: #1e293b;
+    width: 500px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label,
+.url-inputs label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.window-num {
+    background: rgba(255, 255, 255, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.url-input {
+    flex: 1;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-footer {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+}
+
+.btn-save {
+    background: var(--primary);
+    color: #1e293b;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background: var(--primary-hover);
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zepra Personas Hub - Export</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --zepra: #00dc82;
+      --bg-dark: #050505;
+      --card-bg: #111;
+      --border: #2a2e35;
+      --code-bg: #080a0c;
+      --text-main: #ffffff;
+      --text-muted: #8b949e;
+    }
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background-color: #333;
+      font-family: 'Inter', sans-serif;
+    }
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      background-color: var(--bg-dark);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      margin: 0 auto 20px auto;
+      padding: 15mm;
+      overflow: hidden;
+    }
+    @media print {
+      body { background: none; }
+      .sheet {
+        margin: 0;
+        width: 210mm;
+        height: 297mm;
+        page-break-after: always;
+        border: none;
+      }
+      .no-print { display: none !important; }
+    }
+    .header {
+      height: 50px;
+      border-bottom: 2px solid var(--zepra);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .brand {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--text-main);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand i { color: var(--zepra); }
+    .meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9pt;
+      color: var(--zepra);
+      text-align: right;
+    }
+    .footer {
+      height: 30px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      color: var(--text-muted);
+    }
+    .content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .persona-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--zepra);
+      border-radius: 6px;
+      padding: 15px;
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 8px;
+    }
+    .role-info h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .role-desc {
+      font-size: 9pt;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: block;
+    }
+    .card-icon {
+      color: var(--zepra);
+      font-size: 12pt;
+    }
+    .prompt-container {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+      position: relative;
+    }
+    .prompt-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7pt;
+      text-transform: uppercase;
+      color: var(--zepra);
+      margin-bottom: 5px;
+      display: block;
+      font-weight: bold;
+    }
+    .prompt-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      line-height: 1.4;
+      color: #d0d0d0;
+      text-align: justify;
+    }
+    .highlight { color: var(--zepra); font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="render-area"></div>
+  <script src="personas_export.js"></script>
+</body>
+</html>
