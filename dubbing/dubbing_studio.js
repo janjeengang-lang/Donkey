@@ -5,6 +5,7 @@
 class SubtitleOverlay {
     constructor() {
         this.element = null;
+        this.timerEl = null;
         this.init();
     }
 
@@ -14,9 +15,11 @@ class SubtitleOverlay {
         this.element.id = 'zepra-subtitle-overlay';
         this.element.innerHTML = `
             <div class="z-sub-text">Waiting for translation...</div>
+            <div class="z-sub-timer">00:00</div>
             <div class="z-sub-handle">⋮</div>
         `;
         document.body.appendChild(this.element);
+        this.timerEl = this.element.querySelector('.z-sub-timer');
         this.injectStyles();
         this.makeDraggable();
     }
@@ -32,7 +35,7 @@ class SubtitleOverlay {
                 background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
                 border-radius: 16px; padding: 24px 48px;
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
-                z-index: 2147483647; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+                z-index: 2147483647; pointer-events: auto; opacity: 0; transition: opacity 0.3s;
                 text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                 border: 1px solid rgba(255,255,255,0.05);
             }
@@ -43,6 +46,14 @@ class SubtitleOverlay {
                 font-size: 28px; font-weight: 700; line-height: 1.4;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.8);
                 direction: ltr; transition: color 0.2s;
+            }
+
+            .z-sub-timer {
+                margin-top: 10px;
+                font-size: 12px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: rgba(255,255,255,0.6);
             }
             
             .z-sub-handle {
@@ -77,6 +88,14 @@ class SubtitleOverlay {
             txt.style.color = '#ffffff';
             txt.style.fontStyle = 'normal';
         }
+    }
+
+    setTime(seconds) {
+        if (!this.timerEl || Number.isNaN(seconds)) return;
+        const safeSeconds = Math.max(0, seconds);
+        const minutes = Math.floor(safeSeconds / 60);
+        const secs = Math.floor(safeSeconds % 60);
+        this.timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
     show() { this.element.classList.add('visible'); }
@@ -120,6 +139,7 @@ class ZepraDubbingStudio {
         this.overlay = null;
         this.activeVideo = null;
         this.engine = null; // Will bind to ZepraEngine
+        this._timerInterval = null;
     }
 
     init() {
@@ -135,23 +155,6 @@ class ZepraDubbingStudio {
 
         // Bind to Engine
         this.connectToEngine();
-    }
-
-    connectToEngine() {
-        if (!window.ZepraEngine) {
-            console.warn("ZepraEngine not found. Retrying in 500ms");
-            setTimeout(() => this.connectToEngine(), 500);
-            return;
-        }
-        this.engine = window.ZepraEngine;
-
-        // Listen to Engine Events
-        this.engine.on('status', (s) => this.handleCoreStatus(s));
-        this.engine.on('transcript', (t) => this.handleTranscript(t));
-        this.engine.on('translation', (t) => this.handleTranslation(t));
-        this.engine.on('error', (e) => this.handleError(e));
-
-        console.log("UI Connected to Zepra Audio Core.");
     }
 
     setupShortcut() {
@@ -183,87 +186,14 @@ class ZepraDubbingStudio {
             btn.classList.remove('z-primary');
         }
 
-        // Clear buffer and open Scout
-        chrome.runtime.sendMessage({ type: 'BUFFER_CLEAR' });
+        const sourceLang = this.studio.querySelector('#z-dub-source-lang')?.value || 'ar-SA';
+        const targetLang = this.studio.querySelector('#z-dub-target-lang')?.value || 'English';
+
         chrome.runtime.sendMessage({ type: 'OPEN_SCOUT', url: window.location.href });
-
-        // Pause and reset video
-        this.activeVideo.pause();
-        this.activeVideo.currentTime = 0;
-
-        // Show countdown
-        if (this.overlay) {
-            this.overlay.show();
-            for (let i = 10; i > 0; i--) {
-                if (!this.isDubbing) {
-                    this.overlay.hide();
-                    return;
-                }
-                this.overlay.update(`⏳ جاري التحضير... ${i}`, true);
-                await new Promise(r => setTimeout(r, 1000));
-            }
-            this.overlay.update('', false);
+        if (window.ZepraDubBridge) {
+            window.ZepraDubBridge.startSession({ sourceLang, targetLang });
         }
-
-        // Start video
-        this.activeVideo.play();
-        console.log('[DUBBING] Video started, beginning playback loop');
-
-        // Simple polling loop - just pull next available subtitle
-        this._lastDisplayedId = null;
-        this._ttsQueue = [];
-        this._isSpeaking = false;
-
-        this._pollInterval = setInterval(() => {
-            if (!this.isDubbing) {
-                clearInterval(this._pollInterval);
-                return;
-            }
-            if (!this.activeVideo || this.activeVideo.paused) return;
-
-            // Pull NEXT subtitle from queue
-            chrome.runtime.sendMessage({
-                type: 'BUFFER_PULL_NEXT'
-            }, (res) => {
-                if (chrome.runtime.lastError) return;
-
-                if (res && res.item) {
-                    const item = res.item;
-                    console.log(`[DUBBING] Got: "${item.text}"`);
-
-                    // Display
-                    if (this.overlay) {
-                        this.overlay.show();
-                        this.overlay.update(item.text, false);
-                    }
-
-                    // Speak
-                    this._ttsQueue.push(item.text);
-                    this.processTTS();
-                }
-            });
-        }, 800); // Check every 800ms
-    }
-
-    processTTS() {
-        if (this._isSpeaking || this._ttsQueue.length === 0) return;
-
-        this._isSpeaking = true;
-        const text = this._ttsQueue.shift();
-
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US';
-        u.rate = 1.0;
-        u.onend = () => {
-            this._isSpeaking = false;
-            this.processTTS();
-        };
-        u.onerror = () => {
-            this._isSpeaking = false;
-            this.processTTS();
-        };
-
-        window.speechSynthesis.speak(u);
+        this.startTimer();
     }
 
     stopDubbing() {
@@ -276,20 +206,32 @@ class ZepraDubbingStudio {
             btn.classList.add('z-primary');
         }
 
-        // Stop Polling
-        if (this._pollInterval) clearInterval(this._pollInterval);
-
-        // Close Scout window
-        chrome.runtime.sendMessage({ type: 'CLOSE_SCOUT' });
-
-        // Stop Engine (if it was running)
-        if (this.engine && this.engine.stop) this.engine.stop();
+        if (window.ZepraDubBridge) {
+            window.ZepraDubBridge.stopSession();
+        }
 
         // Hide Overlay
         if (this.overlay) this.overlay.hide();
 
         // Cancel any pending speech
         if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+        chrome.runtime.sendMessage({ type: 'CLOSE_SCOUT' });
+        this.stopTimer();
+    }
+
+    startTimer() {
+        if (!this.activeVideo || !this.overlay) return;
+        if (this._timerInterval) clearInterval(this._timerInterval);
+        this._timerInterval = setInterval(() => {
+            if (!this.activeVideo || !this.overlay) return;
+            this.overlay.setTime(this.activeVideo.currentTime || 0);
+        }, 500);
+    }
+
+    stopTimer() {
+        if (this._timerInterval) clearInterval(this._timerInterval);
+        this._timerInterval = null;
     }
     createStudioElement() {
         const div = document.createElement('div');
@@ -515,8 +457,6 @@ class ZepraDubbingStudio {
             btn.className = 'z-dub-btn primary large';
             statusEl.style.color = '#94a3b8';
             if (this.overlay) this.overlay.hide();
-            // Clean up polling interval on stop
-            if (this._pollInterval) clearInterval(this._pollInterval);
         } else if (data.code === 'CONNECTING') {
             btn.textContent = '⏳ Starting...';
             btn.className = 'z-dub-btn primary large';
