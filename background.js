@@ -2095,7 +2095,7 @@ class DubbingAPIService {
     const response = await fetch(this.apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.apiKey}` },
-      body: JSON.stringify({ model: 'llama3.1-8b', messages: messages, temperature: 0.7, max_completion_tokens: 100 })
+      body: JSON.stringify({ model: 'llama-3.3-70b', messages: messages, temperature: 0.3, max_completion_tokens: 250 })
     });
     if (!response.ok) throw new Error("API Request Failed");
     return await response.json();
@@ -2213,6 +2213,8 @@ async function ensureOffscreen() {
 // Global Buffer for Lookahead Subtitles
 let timeMachineBuffer = [];
 let scoutWindowId = null; // Track open Scout window to prevent duplicates
+let scoutTabId = null;
+let dubbingSessions = new Map();
 
 // Clean buffer every 30 seconds
 setInterval(() => {
@@ -2240,11 +2242,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           try {
             const originalUrl = message.url;
+            const scoutUrl = originalUrl.includes('?')
+              ? `${originalUrl}&zepra_scout=1`
+              : `${originalUrl}?zepra_scout=1`;
             console.log("[BROKER] Opening Scout for:", originalUrl);
 
             // Create window (hidden off-screen)
             const win = await chrome.windows.create({
-              url: originalUrl,
+              url: scoutUrl,
               type: 'popup',
               width: 400,
               height: 300,
@@ -2256,12 +2261,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (win && win.tabs && win.tabs.length > 0) {
               scoutWindowId = win.id; // Track the window
               const tabId = win.tabs[0].id;
+              scoutTabId = tabId;
               console.log("[BROKER] Scout window created, ID:", win.id, "Tab:", tabId);
 
               // Clean up when Scout window is closed
               chrome.windows.onRemoved.addListener((closedId) => {
                 if (closedId === scoutWindowId) {
                   scoutWindowId = null;
+                  scoutTabId = null;
                   console.log("[BROKER] Scout window closed");
                 }
               });
@@ -2274,6 +2281,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                   chrome.tabs.sendMessage(tabId, { type: 'FORCE_ACTIVATE_SCOUT' })
                     .then(() => console.log("[BROKER] Activation sent OK"))
                     .catch(e => console.log("[BROKER] Activation send failed:", e));
+                  const session = dubbingSessions.get(sender.tab?.id || 0);
+                  if (session) {
+                    chrome.tabs.sendMessage(tabId, {
+                      type: 'DUB_SCOUT_START',
+                      sourceLang: session.sourceLang,
+                      targetLang: session.targetLang
+                    }).catch(() => { });
+                  }
                 }
               };
               chrome.tabs.onUpdated.addListener(activateScout);
@@ -2316,7 +2331,85 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.log("[BROKER] Closing Scout window:", scoutWindowId);
             chrome.windows.remove(scoutWindowId).catch(() => { });
             scoutWindowId = null;
+            scoutTabId = null;
           }
+          sendResponse({ ok: true });
+          break;
+        }
+
+        case 'DUB_SESSION_START': {
+          const mainTabId = sender.tab?.id || 0;
+          const session = {
+            mainTabId,
+            scoutTabId,
+            sourceLang: message.sourceLang || 'ar-SA',
+            targetLang: message.targetLang || 'English',
+            mainTime: message.mainTime || 0,
+            offset: null,
+            buffer: []
+          };
+          dubbingSessions.set(mainTabId, session);
+          if (scoutTabId) {
+            chrome.tabs.sendMessage(scoutTabId, {
+              type: 'DUB_SCOUT_START',
+              sourceLang: session.sourceLang,
+              targetLang: session.targetLang
+            }).catch(() => { });
+          }
+          sendResponse({ ok: true });
+          break;
+        }
+
+        case 'DUB_SCOUT_READY': {
+          if (!sender.tab?.id) break;
+          const mainSession = Array.from(dubbingSessions.values()).find(s => s.scoutTabId === sender.tab.id);
+          if (mainSession) {
+            mainSession.offset = (message.scoutTime || 0) - (mainSession.mainTime || 0);
+          }
+          sendResponse({ ok: true });
+          break;
+        }
+
+        case 'DUB_SCOUT_TRANSLATION': {
+          if (!sender.tab?.id) break;
+          const session = Array.from(dubbingSessions.values()).find(s => s.scoutTabId === sender.tab.id);
+          if (!session) break;
+          const scoutTime = message.scoutTime || 0;
+          const displayAt = session.offset === null ? scoutTime : scoutTime - session.offset;
+          session.buffer.push({
+            text: message.text,
+            displayAt,
+            delivered: false
+          });
+          session.buffer.sort((a, b) => a.displayAt - b.displayAt);
+          sendResponse({ ok: true });
+          break;
+        }
+
+        case 'DUB_PULL_READY': {
+          const mainTabId = sender.tab?.id || 0;
+          const session = dubbingSessions.get(mainTabId);
+          if (!session) {
+            sendResponse({ items: [] });
+            break;
+          }
+          session.mainTime = message.currentTime || session.mainTime || 0;
+          const tolerance = message.tolerance ?? 0.6;
+          const ready = [];
+          session.buffer.forEach((item) => {
+            if (!item.delivered && item.displayAt <= session.mainTime + tolerance) {
+              item.delivered = true;
+              ready.push({ text: item.text, displayAt: item.displayAt });
+            }
+          });
+          session.buffer = session.buffer.filter(item => item.displayAt > session.mainTime - 8);
+          sendResponse({ items: ready });
+          break;
+        }
+
+        case 'DUB_SESSION_STOP': {
+          const mainTabId = sender.tab?.id || 0;
+          dubbingSessions.delete(mainTabId);
           sendResponse({ ok: true });
           break;
         }
@@ -2450,8 +2543,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         case 'TRANSLATE_BATCH': {
-          const prompt = `Translate the following subtitle text to ${message.targetLanguage || 'English'}. Return ONLY the translation, no quotes, no explanation. Text: ${message.text}`;
-          const result = await callGenerativeModel(prompt, { temperature: 0.3, max_completion_tokens: 150 });
+          const targetLanguage = message.targetLanguage || 'English';
+          const rawSegments = Array.isArray(message.segments) ? message.segments : [];
+          if (rawSegments.length > 0) {
+            const segments = rawSegments.map((segment) => String(segment || '').trim()).filter(Boolean);
+            if (segments.length === 0) {
+              sendResponse({ translatedSegments: [], translated: '' });
+              break;
+            }
+            const prompt = `Translate each line into ${targetLanguage}. Return ONLY the translations, one per line, same order, no numbering or extra text.\n\n${segments.join('\n')}`;
+            const result = await callGenerativeModel(prompt, {
+              temperature: 0.2,
+              max_completion_tokens: 500,
+              model: 'llama-3.3-70b'
+            });
+            const cleanResult = result.replace(/^[`'"]+|[`'"]+$/g, '').trim();
+            let lines = cleanResult.split(/\r?\n/).map((line) => line.replace(/^(Translation:|Answer:)\s*/i, '').trim()).filter(Boolean);
+            if (lines.length === 1 && segments.length > 1) {
+              lines = [cleanResult.trim()];
+            }
+            const translatedSegments = segments.map((_, index) => lines[index] || lines[0] || '');
+            sendResponse({ translatedSegments, translated: translatedSegments.join(' ') });
+            break;
+          }
+
+          const prompt = `Translate the following subtitle text to ${targetLanguage}. Return ONLY the translation, no quotes, no explanation. Text: ${message.text}`;
+          const result = await callGenerativeModel(prompt, { temperature: 0.3, max_completion_tokens: 250, model: 'llama-3.3-70b' });
           let clean = result.replace(/^(Here is|Translation:|Answer:)/i, '').replace(/^[\`'\""]+|[\`'\""]+$/g, '').trim();
           if (clean.startsWith('{')) { try { clean = JSON.parse(clean).answer || clean; } catch (e) { } }
           sendResponse({ translated: clean });
