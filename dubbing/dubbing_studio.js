@@ -137,23 +137,6 @@ class ZepraDubbingStudio {
         this.connectToEngine();
     }
 
-    connectToEngine() {
-        if (!window.ZepraEngine) {
-            console.warn("ZepraEngine not found. Retrying in 500ms");
-            setTimeout(() => this.connectToEngine(), 500);
-            return;
-        }
-        this.engine = window.ZepraEngine;
-
-        // Listen to Engine Events
-        this.engine.on('status', (s) => this.handleCoreStatus(s));
-        this.engine.on('transcript', (t) => this.handleTranscript(t));
-        this.engine.on('translation', (t) => this.handleTranslation(t));
-        this.engine.on('error', (e) => this.handleError(e));
-
-        console.log("UI Connected to Zepra Audio Core.");
-    }
-
     setupShortcut() {
         document.addEventListener('keydown', (e) => {
             if (e.shiftKey && (e.key === 'D' || e.key === 'd')) {
@@ -183,87 +166,12 @@ class ZepraDubbingStudio {
             btn.classList.remove('z-primary');
         }
 
-        // Clear buffer and open Scout
-        chrome.runtime.sendMessage({ type: 'BUFFER_CLEAR' });
-        chrome.runtime.sendMessage({ type: 'OPEN_SCOUT', url: window.location.href });
-
-        // Pause and reset video
-        this.activeVideo.pause();
-        this.activeVideo.currentTime = 0;
-
-        // Show countdown
-        if (this.overlay) {
-            this.overlay.show();
-            for (let i = 10; i > 0; i--) {
-                if (!this.isDubbing) {
-                    this.overlay.hide();
-                    return;
-                }
-                this.overlay.update(`⏳ جاري التحضير... ${i}`, true);
-                await new Promise(r => setTimeout(r, 1000));
-            }
-            this.overlay.update('', false);
+        if (this.engine) {
+            this.engine.activeVideo = this.activeVideo;
+            const sourceLang = this.studio.querySelector('#z-dub-source-lang')?.value || 'ar-SA';
+            const targetLang = this.studio.querySelector('#z-dub-target-lang')?.value || 'English';
+            this.engine.start(sourceLang, targetLang);
         }
-
-        // Start video
-        this.activeVideo.play();
-        console.log('[DUBBING] Video started, beginning playback loop');
-
-        // Simple polling loop - just pull next available subtitle
-        this._lastDisplayedId = null;
-        this._ttsQueue = [];
-        this._isSpeaking = false;
-
-        this._pollInterval = setInterval(() => {
-            if (!this.isDubbing) {
-                clearInterval(this._pollInterval);
-                return;
-            }
-            if (!this.activeVideo || this.activeVideo.paused) return;
-
-            // Pull NEXT subtitle from queue
-            chrome.runtime.sendMessage({
-                type: 'BUFFER_PULL_NEXT'
-            }, (res) => {
-                if (chrome.runtime.lastError) return;
-
-                if (res && res.item) {
-                    const item = res.item;
-                    console.log(`[DUBBING] Got: "${item.text}"`);
-
-                    // Display
-                    if (this.overlay) {
-                        this.overlay.show();
-                        this.overlay.update(item.text, false);
-                    }
-
-                    // Speak
-                    this._ttsQueue.push(item.text);
-                    this.processTTS();
-                }
-            });
-        }, 800); // Check every 800ms
-    }
-
-    processTTS() {
-        if (this._isSpeaking || this._ttsQueue.length === 0) return;
-
-        this._isSpeaking = true;
-        const text = this._ttsQueue.shift();
-
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US';
-        u.rate = 1.0;
-        u.onend = () => {
-            this._isSpeaking = false;
-            this.processTTS();
-        };
-        u.onerror = () => {
-            this._isSpeaking = false;
-            this.processTTS();
-        };
-
-        window.speechSynthesis.speak(u);
     }
 
     stopDubbing() {
@@ -275,12 +183,6 @@ class ZepraDubbingStudio {
             btn.classList.remove('z-danger', 'stop');
             btn.classList.add('z-primary');
         }
-
-        // Stop Polling
-        if (this._pollInterval) clearInterval(this._pollInterval);
-
-        // Close Scout window
-        chrome.runtime.sendMessage({ type: 'CLOSE_SCOUT' });
 
         // Stop Engine (if it was running)
         if (this.engine && this.engine.stop) this.engine.stop();
@@ -515,8 +417,6 @@ class ZepraDubbingStudio {
             btn.className = 'z-dub-btn primary large';
             statusEl.style.color = '#94a3b8';
             if (this.overlay) this.overlay.hide();
-            // Clean up polling interval on stop
-            if (this._pollInterval) clearInterval(this._pollInterval);
         } else if (data.code === 'CONNECTING') {
             btn.textContent = '⏳ Starting...';
             btn.className = 'z-dub-btn primary large';
